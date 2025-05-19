@@ -64,7 +64,11 @@ namespace NonsensicalVideoGenerator
             {
                 string token = "Interactable:"+internalName+"Title";
                 // check if the token exists
+#if ANDROID
+                string localized = L.T(0, token, "");
+#else
                 string localized = L.T(0, token, PluginHandler.GetPluginListFilter());
+#endif
                 if (localized != token || L.GetLocale().name == "dummy")
                     localizedTitle = localized;
                 else

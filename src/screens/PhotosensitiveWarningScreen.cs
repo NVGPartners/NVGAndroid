@@ -45,15 +45,19 @@ namespace NonsensicalVideoGenerator
             }
             try
             {
+#if !ANDROID
                 if(SteamManager.initialized)
                     PluginHandler.LoadWorkshop();
                 else
                     PluginHandler.LoadPluginsThreaded();
+#endif
             }
             catch
             {
                 ConsoleOutput.WriteLine("Failed to load Workshop addons.");
+#if !ANDROID
                 PluginHandler.LoadPluginsThreaded();
+#endif
             }
         }
         private List<string> warningText = new List<string>()

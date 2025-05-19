@@ -321,6 +321,7 @@ namespace NonsensicalVideoGenerator
         }
         public static void SequentialName()
         {
+#if !ANDROID
             string pa = Path.Combine(libraryRootPath, libraryPaths[DefaultLibraryTypes.Render]);
             // does the directory exist?
             if (!Directory.Exists(pa))
@@ -339,6 +340,7 @@ namespace NonsensicalVideoGenerator
                 }
             }
             Global.videoTitle = "Render" + (max + 1);
+#endif
         }
         public static void Unload(LibraryFile file)
         {

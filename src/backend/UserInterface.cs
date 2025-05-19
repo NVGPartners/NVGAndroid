@@ -4,11 +4,14 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Media;
 using System.IO;
-using System.Windows.Forms;
 using System.Globalization;
-using MonoGame.Extended.VideoPlayback;
 using System.Reflection;
 using System.Collections.Generic;
+
+#if !ANDROID
+using System.Windows.Forms;
+using MonoGame.Extended.VideoPlayback;
+#endif
 
 namespace NonsensicalVideoGenerator
 {
@@ -29,8 +32,10 @@ namespace NonsensicalVideoGenerator
         private SpriteBatch? _spriteBatch;
         private WindowState _windowState = WindowState.Unfocused;
         private MusicState _musicState = MusicState.Paused;
+#if !ANDROID
         public MonoGame.Extended.Framework.Media.VideoPlayer? videoPlayer;
         public MonoGame.Extended.Framework.Media.Video? video;
+#endif
         public string videoPath = "";
         public int music = 0;
         public bool introFinished = false;
@@ -43,7 +48,7 @@ namespace NonsensicalVideoGenerator
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
             instance = this;
-            if(Global.parameters.Contains("-unlockfps"))
+            if (Global.parameters.Contains("-unlockfps"))
                 SetFPSUnlock(true);
         }
         public void SetFPSUnlock(bool unlock)
@@ -74,13 +79,13 @@ namespace NonsensicalVideoGenerator
         public void SetFullscreen(bool fullscreen)
         {
             AspectRatio aspectRatio = new();
-            if(SaveData.saveValues["MatchAspectRatio"] == "true")
+            if (SaveData.saveValues["MatchAspectRatio"] == "true")
                 aspectRatio = GlobalGraphics.FindMatchingAspectRatio();
             GlobalGraphics.fullScreen = fullscreen;
             // Borderless
             Window.IsBorderless = fullscreen;
             _graphics.HardwareModeSwitch = fullscreen;
-            if(fullscreen)
+            if (fullscreen)
             {
                 // Set preferred resolution to screen resolution.
                 aspectRatio.preferredResolution = new Point(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width / GlobalGraphics.scale, GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height / GlobalGraphics.scale);
@@ -89,49 +94,56 @@ namespace NonsensicalVideoGenerator
             }
             GlobalGraphics.SetAspectRatio(aspectRatio);
             _graphics.ApplyChanges();
+#if !ANDROID
             Form? windowForm = Control.FromHandle(Window.Handle) as Form;
-            if(windowForm != null)
+            if (windowForm != null)
             {
                 // Place window in center of screen.
-                if(fullscreen)
+                if (fullscreen)
                     windowForm.Location = new System.Drawing.Point(0, 0);
                 else
                     CenterToScreen();
             }
-            if(!fullscreen)
+#endif
+            if (!fullscreen)
                 GlobalGraphics.SetAspectRatio(SaveData.saveValues["MatchAspectRatio"] == "true" ? GlobalGraphics.FindMatchingAspectRatio() : new AspectRatio());
         }
         public void CenterToScreen()
         {
+#if !ANDROID
             Form? windowForm = Control.FromHandle(Window.Handle) as Form;
-            if(windowForm != null && Screen.PrimaryScreen != null)
+            if (windowForm != null && Screen.PrimaryScreen != null)
             {
                 // Place window in center of screen.
                 windowForm.Location = new System.Drawing.Point(Screen.PrimaryScreen.WorkingArea.Width / 2 - windowForm.Width / 2, Screen.PrimaryScreen.WorkingArea.Height / 2 - windowForm.Height / 2);
             }
+#endif
         }
         public void SetAlwaysOnTop(bool alwaysOnTop)
         {
+#if !ANDROID
             Form? windowForm = Control.FromHandle(Window.Handle) as Form;
-            if(windowForm != null)
+            if (windowForm != null)
             {
                 windowForm.TopMost = alwaysOnTop;
             }
+#endif
         }
         public void SetNativeCursor(bool useNativeCursor)
         {
             IsMouseVisible = useNativeCursor;
         }
         // Drag and drop support.
+#if !ANDROID
         private void DragEnter(object? sender, DragEventArgs e)
         {
-            if(e != null && e.Data != null && e.Data.GetDataPresent(DataFormats.FileDrop))
+            if (e != null && e.Data != null && e.Data.GetDataPresent(DataFormats.FileDrop))
                 e.Effect = DragDropEffects.Copy;
             Global.dragDrop = true;
         }
         private void DragDrop(object? sender, DragEventArgs e)
         {
-            if(e != null && e.Data != null)
+            if (e != null && e.Data != null)
             {
                 var files = e.Data.GetData(DataFormats.FileDrop) as string[];
                 Global.dragDropFiles = files != null ? files.ToList() : new List<string>();
@@ -142,9 +154,10 @@ namespace NonsensicalVideoGenerator
         {
             Global.dragDrop = false;
         }
+#endif
         protected override void Initialize()
         {
-            if(bool.Parse(SaveData.saveValues["EnableDiscordRPC"]))
+            if (bool.Parse(SaveData.saveValues["EnableDiscordRPC"]))
                 DiscordRPC.Initialize();
             ConsoleOutput.WriteLine("Starting initialization for v" + Global.productVersion + "...", Color.Transparent);
             Kiwano.Check();
@@ -181,10 +194,10 @@ namespace NonsensicalVideoGenerator
             ConsoleOutput.WriteLine("Initialization complete.", Color.Transparent);
             LibraryData.SequentialName();
             // Show blog if new version.
-            if(SaveData.saveValues["LastVersion"] != Global.productVersion)
+            if (SaveData.saveValues["LastVersion"] != Global.productVersion)
             {
                 // Fix plugin list filter flags (new plugin type was added)
-                if(SaveData.saveValues["PluginListFilterFlags"] == "7")
+                if (SaveData.saveValues["PluginListFilterFlags"] == "7")
                     SaveData.saveValues["PluginListFilterFlags"] = "15";
                 Pagination.SetPage(4);
                 SaveData.saveValues["LastVersion"] = Global.productVersion;
@@ -200,17 +213,17 @@ namespace NonsensicalVideoGenerator
 #endif
             // match aspect ratio
             AspectRatio aspectRatio = new();
-            if(SaveData.saveValues["MatchAspectRatio"] == "true")
+            if (SaveData.saveValues["MatchAspectRatio"] == "true")
                 aspectRatio = GlobalGraphics.FindMatchingAspectRatio();
             GlobalGraphics.SetAspectRatio(aspectRatio);
             // fullscreen
-            if(bool.Parse(SaveData.saveValues["Fullscreen"]))
+            if (bool.Parse(SaveData.saveValues["Fullscreen"]))
                 SetFullscreen(true);
             // always on top
-            if(bool.Parse(SaveData.saveValues["AlwaysOnTop"]))
+            if (bool.Parse(SaveData.saveValues["AlwaysOnTop"]))
                 SetAlwaysOnTop(true);
             // hide cursor
-                SetNativeCursor(bool.Parse(SaveData.saveValues["UseNativeCursor"]));
+            SetNativeCursor(bool.Parse(SaveData.saveValues["UseNativeCursor"]));
             base.Initialize();
         }
         protected override void LoadContent()
@@ -220,7 +233,7 @@ namespace NonsensicalVideoGenerator
             GlobalContent.LoadDefaultContent(Content, GraphicsDevice);
             // Load all screen content.
             ScreenManager.LoadContent(Content, GraphicsDevice);
-            if(bool.Parse(SaveData.saveValues["SkipPhotosensitiveWarningScreen"]))
+            if (bool.Parse(SaveData.saveValues["SkipPhotosensitiveWarningScreen"]))
             {
                 introFinished = true;
                 ScreenManager.PushNavigation("Intro");
@@ -234,26 +247,27 @@ namespace NonsensicalVideoGenerator
         }
         protected override void UnloadContent()
         {
-            if(_spriteBatch != null)
+            if (_spriteBatch != null)
                 _spriteBatch.Dispose();
             // Unload all content.
             GlobalContent.UnloadContent();
-            if(videoPlayer != null)
+#if !ANDROID
+            if (videoPlayer != null)
             {
                 videoPlayer.Dispose();
                 videoPlayer = null;
             }
             videoPath = "";
-            if(video != null)
+            if (video != null)
             {
                 video.Dispose();
             }
+#endif
             FramePlayer.canPlayBgMusic = true;
             base.UnloadContent();
         }
         public void FindMusic()
         {
-#if WINDOWSDX
             music = ThemeManager.GetNextSongIndex(music);
             _musicState = MusicState.Playing;
             try
@@ -264,10 +278,8 @@ namespace NonsensicalVideoGenerator
             {
                 //ConsoleOutput.WriteLine("Failed to play music: " + ex.Message, Color.Red);
             }
-#else
             music = 0;
             _musicState = MusicState.Paused;
-#endif
         }
         protected override void Update(GameTime gameTime)
         {
@@ -279,35 +291,36 @@ namespace NonsensicalVideoGenerator
                 FindMusic();
             }
             */
-            if(bool.Parse(SaveData.saveValues["EnableDiscordRPC"]))
+            if (bool.Parse(SaveData.saveValues["EnableDiscordRPC"]))
                 DiscordRPC.Update();
             SteamRichPresence.Update();
             try
             {
-                if(SteamManager.initialized)
+                if (SteamManager.initialized)
                     SteamManager.Update();
             }
-            catch {}
+            catch { }
             // Update window state.
-            if(IsActive)
+            if (IsActive)
                 _windowState = WindowState.Focused;
             else
                 _windowState = WindowState.Unfocused;
             // Title screen video
-            if(!introStarted)
+#if !ANDROID
+            if (!introStarted)
             {
                 introStarted = true;
                 videoPlayer = new MonoGame.Extended.Framework.Media.VideoPlayer(GraphicsDevice);
                 try
                 {
                     string? randomBootMovie = PluginHandler.PickRandomBootMovie();
-                    if(randomBootMovie != null && File.Exists(randomBootMovie))
+                    if (randomBootMovie != null && File.Exists(randomBootMovie))
                     {
                         videoPath = VideoCache.GetCachePath(randomBootMovie);
                         video = VideoHelper.LoadFromFile(videoPath);
                         // current time + intro duration
                         introGoal = gameTime.TotalGameTime.TotalSeconds + video.Duration.Seconds + 1;
-                        if(randomBootMovie.ToLower().EndsWith("kiwifruitdevlogo.mp4"))
+                        if (randomBootMovie.ToLower().EndsWith("kiwifruitdevlogo.mp4"))
                         {
                             introGoal -= 2;
                         }
@@ -322,21 +335,24 @@ namespace NonsensicalVideoGenerator
                     ConsoleOutput.WriteLine($"Failed to load video: {e.Message}", Color.Red);
                     introFinished = true;
                 }
-                if(video != null)
+                if (video != null)
                 {
                     videoPlayer.Play(video);
                     videoPlayer.Volume = float.Parse(SaveData.saveValues["VideoVolume"], CultureInfo.InvariantCulture) / 100f;
                     FramePlayer.canPlayBgMusic = false;
                 }
             }
-            if(introStarted && (introFinished || videoPath == "" || (videoPlayer != null && video != null && gameTime.TotalGameTime.TotalSeconds >= introGoal)))
+            if (introStarted && (introFinished || videoPath == "" || (videoPlayer != null && video != null && gameTime.TotalGameTime.TotalSeconds >= introGoal)))
             {
-                if(!introFinished)
+#endif
+                if (!introFinished)
                 {
                     videoPath = "";
                     introFinished = true;
-                    if(video != null)
+#if !ANDROID
+                    if (video != null)
                         video.Dispose();
+#endif
                     ScreenManager.PushNavigation("Intro");
                     var screen = ScreenManager.GetScreen<PhotosensitiveWarningScreen>("Intro");
                     if (screen != null)
@@ -346,11 +362,11 @@ namespace NonsensicalVideoGenerator
                 }
                 FramePlayer.Update(gameTime);
                 // Play music after 500ms.
-                if(gameTime.TotalGameTime.TotalMilliseconds > Global.readyTime + Global.waitReady && Global.ready)
+                if (gameTime.TotalGameTime.TotalMilliseconds > Global.readyTime + Global.waitReady && Global.ready)
                 {
-                    if(Global.exiting)
+                    if (Global.exiting)
                     {
-                        if(MediaPlayer.Volume > 0.01f)
+                        if (MediaPlayer.Volume > 0.01f)
                             MediaPlayer.Volume -= 0.01f;
                         else
                         {
@@ -360,32 +376,32 @@ namespace NonsensicalVideoGenerator
                     }
                     else
                     {
-                        if((SaveData.saveValues["MuteMusicWhileTabbedOut"] == "true" ? _windowState == WindowState.Focused : true) && _musicState == MusicState.Playing && FramePlayer.canPlayBgMusic)
+                        if ((SaveData.saveValues["MuteMusicWhileTabbedOut"] == "true" ? _windowState == WindowState.Focused : true) && _musicState == MusicState.Playing && FramePlayer.canPlayBgMusic)
                         {
                             // Fade in music.
                             float vol = int.Parse(SaveData.saveValues["MusicVolume"], CultureInfo.InvariantCulture) / 100f;
-                            if(MediaPlayer.Volume < vol)
+                            if (MediaPlayer.Volume < vol)
                                 MediaPlayer.Volume += 0.1f;
                             // Clamp music if it's over the volume level.
-                            if(MediaPlayer.Volume > vol)
+                            if (MediaPlayer.Volume > vol)
                                 MediaPlayer.Volume = vol;
                         }
                         // Loop music
-                        if(MediaPlayer.State == MediaState.Stopped)
+                        if (MediaPlayer.State == MediaState.Stopped)
                         {
                             FindMusic();
                         }
-                        if(SaveData.saveValues["MuteMusicWhileTabbedOut"] == "true")
+                        if (SaveData.saveValues["MuteMusicWhileTabbedOut"] == "true")
                         {
-                            if(_windowState == WindowState.Focused && _musicState == MusicState.Paused && FramePlayer.canPlayBgMusic)
+                            if (_windowState == WindowState.Focused && _musicState == MusicState.Paused && FramePlayer.canPlayBgMusic)
                             {
                                 MediaPlayer.Resume();
                                 _musicState = MusicState.Playing;
                             }
-                            if((_windowState == WindowState.Unfocused && _musicState == MusicState.Playing) || !FramePlayer.canPlayBgMusic)
+                            if ((_windowState == WindowState.Unfocused && _musicState == MusicState.Playing) || !FramePlayer.canPlayBgMusic)
                             {
                                 // Fade out music.
-                                if(MediaPlayer.Volume > 0.1f)
+                                if (MediaPlayer.Volume > 0.1f)
                                     MediaPlayer.Volume -= 0.1f;
                                 else
                                 {
@@ -396,7 +412,9 @@ namespace NonsensicalVideoGenerator
                         }
                     }
                 }
+#if !ANDROID
             }
+#endif
             // Update screens.
             ScreenManager.Update(gameTime);
             base.Update(gameTime);
@@ -405,17 +423,18 @@ namespace NonsensicalVideoGenerator
         {
             GraphicsDevice.Clear(ThemeManager.GetColor("ClearColor")); // Black background.
             Global.tooltip = "";
-            if(_spriteBatch != null)
+            if (_spriteBatch != null)
             {
                 _spriteBatch.Begin(SpriteSortMode.Deferred,
                     BlendState.AlphaBlend,
                     SamplerState.PointClamp,
                     null, null, null, Matrix.CreateTranslation(GlobalGraphics.Scale(GlobalGraphics.drawOffset.X), GlobalGraphics.Scale(GlobalGraphics.drawOffset.Y), 0));
-                if(!introFinished)
+#if !ANDROID
+                if (!introFinished)
                 {
                     try
                     {
-                        if(videoPlayer != null)
+                        if (videoPlayer != null)
                         {
                             // Title screen video
                             Texture2D texture = videoPlayer.GetTexture();
@@ -423,13 +442,14 @@ namespace NonsensicalVideoGenerator
                                 _spriteBatch.Draw(texture, new Rectangle(0, 0, GlobalGraphics.scaledWidth, GlobalGraphics.scaledHeight), Color.White);
                         }
                     }
-                    catch {}
+                    catch { }
                 }
+#endif
                 try
                 {
                     ScreenManager.Draw(gameTime, _spriteBatch);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     ConsoleOutput.WriteLine("Error while drawing screen: " + e.Message, Color.Red);
                 }
@@ -439,13 +459,13 @@ namespace NonsensicalVideoGenerator
                     SamplerState.PointClamp,
                     null, null, null, Matrix.CreateTranslation(0, 0, 0));
                 // Debug pause indicator
-                if(Debug.paused)
+                if (Debug.paused)
                 {
                     SpriteFont font = L.FontLarge();
                     string debugPaused = "Debug Paused";
                     Vector2 debugPausedSize = font.MeasureString(debugPaused);
-                    GlobalContent.DrawString(_spriteBatch, font, debugPaused, new Vector2(GlobalGraphics.preferredResolution.X-GlobalGraphics.Scale(8-1)-debugPausedSize.X, GlobalGraphics.Scale(8+1)), Color.Black);
-                    GlobalContent.DrawString(_spriteBatch, font, debugPaused, new Vector2(GlobalGraphics.preferredResolution.X-GlobalGraphics.Scale(8)-debugPausedSize.X, GlobalGraphics.Scale(8)), ThemeManager.GetColor("VideoPlayerProgressBar"));
+                    GlobalContent.DrawString(_spriteBatch, font, debugPaused, new Vector2(GlobalGraphics.preferredResolution.X - GlobalGraphics.Scale(8 - 1) - debugPausedSize.X, GlobalGraphics.Scale(8 + 1)), Color.Black);
+                    GlobalContent.DrawString(_spriteBatch, font, debugPaused, new Vector2(GlobalGraphics.preferredResolution.X - GlobalGraphics.Scale(8) - debugPausedSize.X, GlobalGraphics.Scale(8)), ThemeManager.GetColor("VideoPlayerProgressBar"));
                 }
                 _spriteBatch.End();
             }
@@ -458,20 +478,22 @@ namespace NonsensicalVideoGenerator
         }
         public void ExitGracefully()
         {
-            if(!Global.exiting)
+            if (!Global.exiting)
             {
                 videoPath = "";
-                if(videoPlayer != null)
+#if !ANDROID
+                if (videoPlayer != null)
                 {
                     videoPlayer.Dispose();
                     videoPlayer = null;
                 }
                 FramePlayer.canPlayBgMusic = true;
-                if(video != null)
+                if (video != null)
                 {
                     video.Dispose();
                     video = null;
                 }
+#endif
                 Global.generator.progressText = L.T(0, "Content:StatusExiting");
                 Global.generator.failureReason = L.T(0, "Content:StatusExiting");
                 Global.exiting = true;
@@ -479,7 +501,7 @@ namespace NonsensicalVideoGenerator
                 Global.exitOpacityIncrease = 0.0075f;
                 Global.fakeExit = false;
                 GlobalContent.PlaySound("Quit");
-                if(SteamManager.initialized)
+                if (SteamManager.initialized)
                     SteamManager.Shutdown();
                 DiscordRPC.Shutdown();
                 ConsoleOutput.WriteLine("Exiting gracefully...", Color.Transparent);
@@ -487,13 +509,13 @@ namespace NonsensicalVideoGenerator
         }
         protected override void OnExiting(object sender, ExitingEventArgs args)
         {
-            if(Global.exiting)
+            if (Global.exiting)
             {
                 args.Cancel = true;
                 return;
             }
             base.OnExiting(sender, args);
-            if(SteamManager.initialized)
+            if (SteamManager.initialized)
                 SteamManager.Shutdown();
             DiscordRPC.Shutdown();
         }

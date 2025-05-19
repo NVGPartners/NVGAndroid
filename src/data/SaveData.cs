@@ -15,7 +15,7 @@ namespace NonsensicalVideoGenerator
     {
         public static Dictionary<string, string> saveValues = new Dictionary<string, string>()
         {
-            {"ScreenScale", "2"}, // 1 - 4 ONLY!
+            {"ScreenScale", "4"}, // 1 - 4 ONLY!
             {"MinStreamDuration", "0.2"},
             {"MaxStreamDuration", "0.4"},
             {"MaxClipCount", "20"},
@@ -119,11 +119,13 @@ namespace NonsensicalVideoGenerator
                 {
                     ConsoleOutput.WriteLine("Failed to load save file.", Color.Red);
                 }
+#if !ANDROID
                 if (UserInterface.instance != null)
                 {
                     if (UserInterface.instance.videoPlayer != null)
                         UserInterface.instance.videoPlayer.Volume = int.Parse(SaveData.saveValues["VideoVolume"], CultureInfo.InvariantCulture) / 100f;
                 }
+#endif
                 return true;
             }
             catch(Exception e)

@@ -8,7 +8,10 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Media;
 using System.Globalization;
+
+#if !ANDROID
 using MonoGame.Extended.VideoPlayback;
+#endif
 
 namespace NonsensicalVideoGenerator
 {
@@ -35,6 +38,7 @@ namespace NonsensicalVideoGenerator
         public static bool canPlayBgMusic = true;
         private static void ExtractFramesAndAudio()
         {
+#if !ANDROID
             try
             {
                 if(worker.CancellationPending || !processing)
@@ -181,16 +185,18 @@ namespace NonsensicalVideoGenerator
                 Global.generator.progressText = L.T(0, "Video:StatusFailPlay");
             }
             processing = false;
+#endif
         }
         // Progress thread (checks directory size)
         public static void ProgressThread()
         {
+#if !ANDROID
             int dircount = 0;
-            while(processing && !progressWorker.CancellationPending && dircount < count)
+            while (processing && !progressWorker.CancellationPending && dircount < count)
             {
                 // Check directory size
                 dircount = Directory.GetFiles(".\\temp\\extracted\\frames").Length;
-                if(dircount > 0)
+                if (dircount > 0)
                 {
                     Global.generator.progressText = L.T(0, "Video:StatusExtractFrames", dircount.ToString(CultureInfo.InvariantCulture), count.ToString(CultureInfo.InvariantCulture));
                 }
@@ -200,13 +206,15 @@ namespace NonsensicalVideoGenerator
                 }
                 System.Threading.Thread.Sleep(100);
             }
+#endif
         }
         public static void CountThread()
         {
+#if !ANDROID
             // Get frame count with ffprobe
             try
             {
-                if(countWorker.CancellationPending || !processing)
+                if (countWorker.CancellationPending || !processing)
                     return;
                 ProcessStartInfo startInfo = new()
                 {
@@ -220,31 +228,34 @@ namespace NonsensicalVideoGenerator
                 {
                     StartInfo = startInfo
                 };
-                process.OutputDataReceived += (sender, args) => {
-                    if(args.Data != null)
+                process.OutputDataReceived += (sender, args) =>
+                {
+                    if (args.Data != null)
                     {
                         count = int.Parse(args.Data, CultureInfo.InvariantCulture);
                         ConsoleOutput.WriteLine(args.Data, Color.Transparent);
                     }
                 };
-                if(countWorker.CancellationPending || !processing)
+                if (countWorker.CancellationPending || !processing)
                     return;
                 process.Start();
-                if(countWorker.CancellationPending || !processing)
+                if (countWorker.CancellationPending || !processing)
                     return;
                 process.BeginOutputReadLine();
-                if(countWorker.CancellationPending || !processing)
+                if (countWorker.CancellationPending || !processing)
                     return;
                 process.WaitForExit();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 ConsoleOutput.WriteLine($"Failed to get frame count.");
                 ConsoleOutput.WriteLine(e.Message);
             }
+#endif
         }
         public static bool Stop()
         {
+#if !ANDROID
             try
             {
                 if(countWorker.IsBusy || progressWorker.IsBusy || worker.IsBusy)
@@ -296,13 +307,15 @@ namespace NonsensicalVideoGenerator
                 ConsoleOutput.WriteLine(e.Message);
                 return false;
             }
+#endif
             return true;
         }
         public static void AudioConvertThread()
         {
+#if !ANDROID
             try
             {
-                if(audioConvertWorker.CancellationPending || !processing)
+                if (audioConvertWorker.CancellationPending || !processing)
                     return;
                 ProcessStartInfo startInfo = new()
                 {
@@ -316,25 +329,26 @@ namespace NonsensicalVideoGenerator
                 {
                     StartInfo = startInfo
                 };
-                process.ErrorDataReceived += (sender, args) => {
-                    if(args.Data != null)
+                process.ErrorDataReceived += (sender, args) =>
+                {
+                    if (args.Data != null)
                         ConsoleOutput.WriteLine(args.Data, Color.Transparent);
                 };
-                if(audioConvertWorker.CancellationPending || !processing)
+                if (audioConvertWorker.CancellationPending || !processing)
                     return;
                 process.Start();
-                if(audioConvertWorker.CancellationPending || !processing)
+                if (audioConvertWorker.CancellationPending || !processing)
                     return;
                 process.BeginErrorReadLine();
-                if(audioConvertWorker.CancellationPending || !processing)
+                if (audioConvertWorker.CancellationPending || !processing)
                     return;
                 process.WaitForExit();
-                if(!File.Exists(".\\temp\\extracted\\audio.wav"))
+                if (!File.Exists(".\\temp\\extracted\\audio.wav"))
                 {
                     throw new Exception("Failed to convert audio.");
                 }
                 // Unload audio
-                if(audio != null)
+                if (audio != null)
                 {
                     audio.Stop();
                     audio.Dispose();
@@ -350,16 +364,16 @@ namespace NonsensicalVideoGenerator
                 canPlayBgMusic = false;
                 Process waveProcess = Generator.GenerateThumbnail(currentPath, ".\\temp\\extracted\\audio.bmp", LibraryRootType.Audio, 100, 78);
                 // Defer until the process is finished
-                while(!waveProcess.HasExited)
+                while (!waveProcess.HasExited)
                 {
                     System.Threading.Thread.Sleep(100);
                 }
                 audioFrame = null;
                 FileStream audioFrameFile = File.OpenRead(".\\temp\\extracted\\audio.bmp");
-                if(UserInterface.instance != null)
+                if (UserInterface.instance != null)
                     audioFrame = Texture2D.FromStream(UserInterface.instance.GraphicsDevice, audioFrameFile);
                 audioFrameFile.Close();
-                if(SaveData.saveValues["UseExternalVideoPlayer"] == "false")
+                if (SaveData.saveValues["UseExternalVideoPlayer"] == "false")
                 {
                     audio.Volume = float.Parse(SaveData.saveValues["VideoVolume"], CultureInfo.InvariantCulture) / 100f;
                     audio.Play();
@@ -374,15 +388,17 @@ namespace NonsensicalVideoGenerator
                     audioPlaying = false;
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 ConsoleOutput.WriteLine($"Failed to convert audio.");
                 ConsoleOutput.WriteLine(e.Message);
             }
             processing = false;
+#endif
         }
         public static void PlayMedia(LibraryFile file)
         {
+#if !ANDROID
             if(SaveData.saveValues["UseExternalVideoPlayer"] == "true")
             {
                 try
@@ -501,17 +517,19 @@ namespace NonsensicalVideoGenerator
                 GlobalContent.PlaySound("Error");
                 Global.generator.progressText = L.T(0, "Video:StatusFailStop");
             }
+#endif
         }
         public static void Update(GameTime gameTime)
         {
-            if(Global.videoPlaying && UserInterface.instance != null && UserInterface.instance.videoPlayer != null && UserInterface.instance.videoPath != "" && UserInterface.instance.videoPlayer.State == MediaState.Stopped)
+#if !ANDROID
+            if (Global.videoPlaying && UserInterface.instance != null && UserInterface.instance.videoPlayer != null && UserInterface.instance.videoPath != "" && UserInterface.instance.videoPlayer.State == MediaState.Stopped)
             {
                 Stop();
                 canPlayBgMusic = false;
                 UserInterface.instance.videoPlayer.Dispose();
                 UserInterface.instance.videoPlayer = null;
                 UserInterface.instance.videoPlayer = new MonoGame.Extended.Framework.Media.VideoPlayer(UserInterface.instance.GraphicsDevice);
-                if(UserInterface.instance.video != null)
+                if (UserInterface.instance.video != null)
                 {
                     UserInterface.instance.video.Dispose();
                     UserInterface.instance.video = null;
@@ -519,21 +537,21 @@ namespace NonsensicalVideoGenerator
                 UserInterface.instance.video = VideoHelper.LoadFromFile(UserInterface.instance.videoPath);
                 UserInterface.instance.videoPlayer.Play(UserInterface.instance.video);
                 UserInterface.instance.videoPlayer.Volume = float.Parse(SaveData.saveValues["VideoVolume"], CultureInfo.InvariantCulture) / 100f;
-                if(ScreenManager.GetScreen<VideoScreen>("Video") == null
+                if (ScreenManager.GetScreen<VideoScreen>("Video") == null
                     || ScreenManager.GetScreen<VideoScreen>("Video")?.screenType == ScreenType.Hidden)
                 {
                     ScreenManager.PushNavigation("Video");
                     ScreenManager.GetScreen<VideoScreen>("Video")?.Show();
                 }
             }
-            if(SaveData.saveValues["UseExternalVideoPlayer"] == "false")
+            if (SaveData.saveValues["UseExternalVideoPlayer"] == "false")
             {
-                if(audioLength > 0 && currentAudioTime < audioLength && audioPlaying)
+                if (audioLength > 0 && currentAudioTime < audioLength && audioPlaying)
                 {
                     currentAudioTime += gameTime.ElapsedGameTime.TotalMilliseconds;
-                    if(currentAudioTime > audioLength)
+                    if (currentAudioTime > audioLength)
                     {
-                        if(audio != null)
+                        if (audio != null)
                             audio.Stop();
                         currentAudioTime = 0;
                         audioPlaying = false;
@@ -541,7 +559,7 @@ namespace NonsensicalVideoGenerator
                         Global.generator.progressText = L.T(0, "Video:StatusStop");
                     }
                 }
-                if(frames.Count > 0 && !playing && audio != null && !processing)
+                if (frames.Count > 0 && !playing && audio != null && !processing)
                 {
                     Global.generator.progressText = L.T(0, "Video:StatusPlay");
                     timeStarted = gameTime.TotalGameTime.TotalSeconds;
@@ -552,30 +570,31 @@ namespace NonsensicalVideoGenerator
                     currentFrame = 0;
                     playing = true;
                 }
-                else if(processing && startedProcessing == 0)
+                else if (processing && startedProcessing == 0)
                 {
                     startedProcessing = gameTime.TotalGameTime.TotalSeconds;
                 }
-                if(playing)
+                if (playing)
                 {
-                    if(currentFrame >= 0 && currentFrame < frames.Count)
+                    if (currentFrame >= 0 && currentFrame < frames.Count)
                     {
                         // Update frame
                         currentFrame = (int)((gameTime.TotalGameTime.TotalSeconds - timeStarted) * fps);
-                        if(currentFrame >= frames.Count)
+                        if (currentFrame >= frames.Count)
                         {
-                            if(audio != null)
+                            if (audio != null)
                                 audio.Stop();
                             playing = false;
                         }
                     }
                     // Update volume on the fly
-                    if(audio != null)
+                    if (audio != null)
                     {
                         audio.Volume = int.Parse(SaveData.saveValues["VideoVolume"], CultureInfo.InvariantCulture) / 100f;
                     }
                 }
             }
+#endif
         }
     }
 }

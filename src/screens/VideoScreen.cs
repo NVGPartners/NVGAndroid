@@ -83,6 +83,9 @@ namespace NonsensicalVideoGenerator
         }
         public bool Update(GameTime gameTime, bool handleInput)
         {
+#if ANDROID
+            return false;
+#else
             // When animation is done, set screen type
             if (hiding && offset.X == GlobalGraphics.Scale(-124))
             {
@@ -255,10 +258,12 @@ namespace NonsensicalVideoGenerator
             if(!inputHandled && (hiding || screenType == ScreenType.Hidden))
                 return false;
             return handleInput ? inputHandled : false;
+#endif
         }
         public int flash = 0;
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
+#if !ANDROID
             Texture2D pixel = GlobalContent.GetTexture("Pixel");
             // End existing spritebatch
             spriteBatch.End();
@@ -305,12 +310,15 @@ namespace NonsensicalVideoGenerator
                 BlendState.AlphaBlend,
                 SamplerState.PointClamp,
                 null, null, null, Matrix.CreateTranslation(GlobalGraphics.Scale(GlobalGraphics.drawOffset.X), GlobalGraphics.Scale(GlobalGraphics.drawOffset.Y), 0));
+#endif
         }
         public void LoadContent(ContentManager contentManager, GraphicsDevice graphicsDevice)
         {
+#if !ANDROID
             // Video Window
             GlobalContent.AddTexture("VidWindow", ThemeManager.LoadLayeredContent<Texture2D>("graphics/vidwindow"));
             GlobalContent.AddTexture("VidBG", ThemeManager.LoadLayeredContent<Texture2D>("graphics/vidbg"));
+#endif
         }
     }
 }

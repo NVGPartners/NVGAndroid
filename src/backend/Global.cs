@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+
+#if !ANDROID
 using Steamworks;
+#endif
 
 namespace NonsensicalVideoGenerator
 {
@@ -32,7 +35,9 @@ namespace NonsensicalVideoGenerator
         public static bool useSystemMagick = false;
         public static bool useSystemYtDlp = false;
         public static string editing = "";
+#if !ANDROID
         public static AppId_t appId = new(2516360);
+#endif
         public static string videoTitle = "Render1";
         public static bool rolledForOverlay = false;
         public static bool usedWorkshopPlugin = false;
@@ -50,7 +55,7 @@ namespace NonsensicalVideoGenerator
         public static bool selectLanguage = false;
         public static readonly int currentYear = DateTime.UtcNow.Year;
         public static bool videoPlaying = false;
-        
+
         // Aspect ratio functions
         public static (int, int) ConvertToFraction(double aspectRatio, double tolerance = 0.01)
         {

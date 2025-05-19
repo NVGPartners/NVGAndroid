@@ -1,5 +1,8 @@
 using System;
+
+#if !ANDROID
 using Steamworks;
+#endif
 
 namespace NonsensicalVideoGenerator
 {
@@ -9,6 +12,7 @@ namespace NonsensicalVideoGenerator
 
         public static void Initialize()
         {
+#if !ANDROID
             try
             {
 #if DEBUG
@@ -68,6 +72,7 @@ namespace NonsensicalVideoGenerator
                 ConsoleOutput.WriteLine("[Steamworks.NET] Could not initialize SteamAPI: " + e.ToString());
                 return;
             }
+#endif
         }
 
         // OnApplicationQuit gets called too early to shutdown the SteamAPI.
@@ -75,6 +80,7 @@ namespace NonsensicalVideoGenerator
         // Thus it is not recommended to perform any Steamworks work in other OnDestroy functions as the order of execution can not be garenteed upon Shutdown. Prefer OnDisable().
         public static void Shutdown()
         {
+#if !ANDROID
             if(!initialized)
                 return;
             try
@@ -86,14 +92,17 @@ namespace NonsensicalVideoGenerator
                 ConsoleOutput.WriteLine("[Steamworks.NET] Could not shutdown SteamAPI: " + e.ToString());
             }
             initialized = false;
+#endif
         }
 
         public static void Update()
         {
+#if !ANDROID
             if (!initialized)
                 return;
             // Run Steam client callbacks
             SteamAPI.RunCallbacks();
+#endif
         }
     }
 

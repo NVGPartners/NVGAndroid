@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+
+#if !ANDROID
 using Steamworks;
+#endif
 
 namespace NonsensicalVideoGenerator
 {
@@ -9,6 +12,7 @@ namespace NonsensicalVideoGenerator
         public static List<string> awardedAchievements = new List<string>();
         public static void GetCurrentAchievements()
         {
+#if !ANDROID
             if(SteamManager.initialized)
             {
                 for(int i = 0; i < SteamUserStats.GetNumAchievements(); i++)
@@ -21,9 +25,11 @@ namespace NonsensicalVideoGenerator
                     }
                 }
             }
+#endif
         }
         public static void Award(string achievement)
         {
+#if !ANDROID
             if(Debug.debugModePermanent)
             {
                 ConsoleOutput.WriteLine("Debug mode enabled, not awarding achievement: "+achievement, Color.LightBlue);
@@ -38,6 +44,7 @@ namespace NonsensicalVideoGenerator
                     SteamUserStats.SetAchievement(achievement);
                 }
             }
+#endif
         }
     }
 }

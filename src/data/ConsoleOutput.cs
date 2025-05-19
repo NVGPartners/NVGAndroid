@@ -101,7 +101,9 @@ namespace NonsensicalVideoGenerator
                 }
             }
             ConsoleColor cc = GetColor(c);
+#if !ANDROID
             Console.ForegroundColor = cc;
+#endif
             if (!newLine)
                 Console.Write(line);
             else
@@ -110,6 +112,7 @@ namespace NonsensicalVideoGenerator
             while (output.Count > maxLines)
                 output.RemoveAt(0);
             // Write to file.
+#if !ANDROID
             try
             {
                 using (StreamWriter writer = new StreamWriter("console.txt", true))
@@ -123,6 +126,7 @@ namespace NonsensicalVideoGenerator
             catch
             {
             }
+#endif
         }
         // Split newlines.
         public static void WriteLine(string line, Color? color = null)
@@ -192,6 +196,7 @@ namespace NonsensicalVideoGenerator
         public static void Clear()
         {
             output.Clear();
+#if !ANDROID
             // DEBUG: Delete file.
             try
             {
@@ -200,6 +205,7 @@ namespace NonsensicalVideoGenerator
             catch
             {
             }
+#endif
         }
     }
 }

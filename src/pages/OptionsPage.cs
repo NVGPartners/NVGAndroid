@@ -1,11 +1,13 @@
-using System;
-using System.Diagnostics;
-using System.Globalization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
+using System.Globalization;
+
+#if !ANDROID
 using Steamworks;
+#endif
 
 namespace NonsensicalVideoGenerator
 {
@@ -27,39 +29,39 @@ namespace NonsensicalVideoGenerator
         private string internalTooltip = "";
         public bool Update(GameTime gameTime, bool handleInput)
         {
-            if(Global.selectLanguage)
+            if (Global.selectLanguage)
             {
                 Global.selectLanguage = false;
                 LocaleAction(2, "");
             }
             // Interactable
-            if(viewingLocalizations)
+            if (viewingLocalizations)
             {
-                if(actionController2.Update(gameTime, handleInput))
+                if (actionController2.Update(gameTime, handleInput))
                     return true;
                 int plcount = L.locales.Count - 1;
                 int offsetpl = 0;
                 int tempMaxScrollOffset = plcount - offsetpl;
                 tempMaxScrollOffset -= 11; // 11 entries fit on the screen
-                if(tempMaxScrollOffset <= 0)
+                if (tempMaxScrollOffset <= 0)
                     tempMaxScrollOffset = 0;
                 maxScrollOffset = tempMaxScrollOffset * 16;
                 offsetpl = 0;
-                if(handleInput || dragging)
+                if (handleInput || dragging)
                 {
                     internalTooltip = "";
                     for (int i = 0; i < plcount; i++)
                     {
                         int inRange = 290;
                         if (MouseInput.MouseState.X >= GlobalGraphics.Scale(138) && MouseInput.MouseState.X < GlobalGraphics.Scale(inRange)
-                            && MouseInput.MouseState.Y >= GlobalGraphics.Scale(59 + ((i-offsetpl) * 16) - scrollOffset) && MouseInput.MouseState.Y < GlobalGraphics.Scale(70 + ((i-offsetpl) * 16) - scrollOffset))
+                            && MouseInput.MouseState.Y >= GlobalGraphics.Scale(59 + ((i - offsetpl) * 16) - scrollOffset) && MouseInput.MouseState.Y < GlobalGraphics.Scale(70 + ((i - offsetpl) * 16) - scrollOffset))
                         {
                             // Capitalize first letter of L.locales[i+1].name
-                            string properLocaleName = L.locales[i+1].name.Substring(0, 1).ToUpper() + L.locales[i+1].name.Substring(1);
-                            internalTooltip = properLocaleName + " (" + Math.Round(L.locales[i+1].percentageComplete * 100) + "%)";
+                            string properLocaleName = L.locales[i + 1].name.Substring(0, 1).ToUpper() + L.locales[i + 1].name.Substring(1);
+                            internalTooltip = properLocaleName + " (" + Math.Round(L.locales[i + 1].percentageComplete * 100) + "%)";
                         }
                     }
-                    if(maxScrollOffset > 0)
+                    if (maxScrollOffset > 0)
                     {
                         if (MouseInput.MouseState.ScrollWheelValue != MouseInput.LastMouseState.ScrollWheelValue)
                         {
@@ -86,12 +88,12 @@ namespace NonsensicalVideoGenerator
                             }
                         }
                         // Scroll handle
-                        if(!dragging)
+                        if (!dragging)
                         {
                             if (MouseInput.LastMouseState.LeftButton == ButtonState.Released && MouseInput.MouseState.LeftButton == ButtonState.Pressed)
                             {
                                 // directly on handle (start dragging)
-                                if(MouseInput.MouseState.X >= GlobalGraphics.Scale(294) && MouseInput.MouseState.X < GlobalGraphics.Scale(303)
+                                if (MouseInput.MouseState.X >= GlobalGraphics.Scale(294) && MouseInput.MouseState.X < GlobalGraphics.Scale(303)
                                     && MouseInput.MouseState.Y >= GlobalGraphics.Scale(69 + scrollOffset * (214 - 69) / maxScrollOffset) && MouseInput.MouseState.Y < GlobalGraphics.Scale(78 + scrollOffset * (214 - 69) / maxScrollOffset))
                                 {
                                     dragging = true;
@@ -100,18 +102,18 @@ namespace NonsensicalVideoGenerator
                                     return true;
                                 }
                                 // on scroll bar empty space (move center of handle to there)
-                                if(MouseInput.MouseState.X >= GlobalGraphics.Scale(294+3) && MouseInput.MouseState.X < GlobalGraphics.Scale(303-3)
-                                    && MouseInput.MouseState.Y >= GlobalGraphics.Scale(69+4) && MouseInput.MouseState.Y < GlobalGraphics.Scale(223-4))
+                                if (MouseInput.MouseState.X >= GlobalGraphics.Scale(294 + 3) && MouseInput.MouseState.X < GlobalGraphics.Scale(303 - 3)
+                                    && MouseInput.MouseState.Y >= GlobalGraphics.Scale(69 + 4) && MouseInput.MouseState.Y < GlobalGraphics.Scale(223 - 4))
                                 {
                                     scrollOffset = (MouseInput.MouseState.Y - GlobalGraphics.Scale(69) - GlobalGraphics.Scale(4)) * maxScrollOffset / (GlobalGraphics.Scale(214) - GlobalGraphics.Scale(69));
                                     GlobalContent.PlaySound("Option");
                                     return true;
                                 }
                                 // 293, 57, 11x11 Scroll Up
-                                if(MouseInput.MouseState.X >= GlobalGraphics.Scale(294) && MouseInput.MouseState.X < GlobalGraphics.Scale(304)
+                                if (MouseInput.MouseState.X >= GlobalGraphics.Scale(294) && MouseInput.MouseState.X < GlobalGraphics.Scale(304)
                                     && MouseInput.MouseState.Y >= GlobalGraphics.Scale(57) && MouseInput.MouseState.Y < GlobalGraphics.Scale(68))
                                 {
-                                    if(scrollOffset - 1 >= 0)
+                                    if (scrollOffset - 1 >= 0)
                                     {
                                         GlobalContent.PlaySound("Option");
                                         int oldScrollOffset = scrollOffset;
@@ -194,7 +196,7 @@ namespace NonsensicalVideoGenerator
                         if (MouseInput.MouseState.LeftButton == ButtonState.Pressed && MouseInput.LastMouseState.LeftButton == ButtonState.Released)
                         {
                             // 293, 57, 11x11 Scroll Up
-                            if(MouseInput.MouseState.X >= GlobalGraphics.Scale(294) && MouseInput.MouseState.X < GlobalGraphics.Scale(304)
+                            if (MouseInput.MouseState.X >= GlobalGraphics.Scale(294) && MouseInput.MouseState.X < GlobalGraphics.Scale(304)
                                 && MouseInput.MouseState.Y >= GlobalGraphics.Scale(57) && MouseInput.MouseState.Y < GlobalGraphics.Scale(68))
                             {
                                 // Set to 0 because this is the top.
@@ -222,8 +224,9 @@ namespace NonsensicalVideoGenerator
                     {
                         int inRange = 290;
                         // Main Button
-                        Accessibility.CompatAccessibility(new Rectangle(GlobalGraphics.Scale(138), GlobalGraphics.Scale(59 + ((i-offsetpl) * 16) - scrollOffset), GlobalGraphics.Scale(inRange-138), GlobalGraphics.Scale((70 + ((i-offsetpl) * 16) - scrollOffset) - (59 + ((i-offsetpl) * 16) - scrollOffset))), L.T(0, "Accessibility:AddonsOpenContainer", L.locales[i+1].name));
+                        Accessibility.CompatAccessibility(new Rectangle(GlobalGraphics.Scale(138), GlobalGraphics.Scale(59 + ((i - offsetpl) * 16) - scrollOffset), GlobalGraphics.Scale(inRange - 138), GlobalGraphics.Scale((70 + ((i - offsetpl) * 16) - scrollOffset) - (59 + ((i - offsetpl) * 16) - scrollOffset))), L.T(0, "Accessibility:AddonsOpenContainer", L.locales[i + 1].name));
                     }
+#if !ANDROID
                     if(MouseInput.MouseState.LeftButton == ButtonState.Pressed && MouseInput.LastMouseState.LeftButton == ButtonState.Released)
                     {
                         offsetpl = 0;
@@ -248,6 +251,7 @@ namespace NonsensicalVideoGenerator
                             }
                         }
                     }
+#endif
                 }
             }
             else
@@ -388,8 +392,10 @@ namespace NonsensicalVideoGenerator
                         ((Switch)scrollView.Controller.interactables["SkipPhotosensitiveWarningScreen"]).SwitchState = SaveData.saveValues["SkipPhotosensitiveWarningScreen"] == "true";
                         ((Switch)scrollView.Controller.interactables["DisableHolidays"]).SwitchState = SaveData.saveValues["DisableHolidays"] == "true";
                         ((Switch)scrollView.Controller.interactables["UseExternalVideoPlayer"]).SwitchState = SaveData.saveValues["UseExternalVideoPlayer"] == "true";
+#if !ANDROID
                         if(UserInterface.instance != null && UserInterface.instance.videoPlayer != null)
                             UserInterface.instance.videoPlayer.Volume = int.Parse(SaveData.saveValues["VideoVolume"], CultureInfo.InvariantCulture) / 100f;
+#endif
                         if(FramePlayer.audio != null)
                             FramePlayer.audio.Volume = float.Parse(SaveData.saveValues["VideoVolume"], CultureInfo.InvariantCulture) / 100f;
                         return true;
@@ -513,8 +519,10 @@ namespace NonsensicalVideoGenerator
                 SaveData.saveValues["VideoVolume"] = scrollView.Controller.interactables["VideoVolume"].Tooltip;
                 if(oldValue != SaveData.saveValues["VideoVolume"])
                     SaveData.Save();
+#if !ANDROID
                 if(UserInterface.instance != null && UserInterface.instance.videoPlayer != null)
                     UserInterface.instance.videoPlayer.Volume = int.Parse(SaveData.saveValues["VideoVolume"], CultureInfo.InvariantCulture) / 100f;
+#endif
                 if(FramePlayer.audio != null)
                     FramePlayer.audio.Volume = float.Parse(SaveData.saveValues["VideoVolume"], CultureInfo.InvariantCulture) / 100f;
                 return false;
@@ -582,6 +590,7 @@ namespace NonsensicalVideoGenerator
                 if(int.Parse(scrollView.Controller.interactables["Scale"].Tooltip, CultureInfo.InvariantCulture) > 4)
                     scrollView.Controller.interactables["Scale"].Tooltip = "4";
                 SaveData.saveValues["ScreenScale"] = scrollView.Controller.interactables["Scale"].Tooltip;
+#if !ANDROID
                 if(oldValue != int.Parse(SaveData.saveValues["ScreenScale"], CultureInfo.InvariantCulture))
                 {
                     SaveData.Save();
@@ -599,6 +608,7 @@ namespace NonsensicalVideoGenerator
                     if(UserInterface.instance != null)
                         UserInterface.instance.Exit();
                 }
+#endif
                 return false;
             }));
             scrollView.Controller.Add("SFXVolume", new TextEntry("Sound Effect Volume", "Sound effect volume level, from 0-100.", SaveData.saveValues["SoundEffectVolume"], new Vector2(139, 60-(8*1)+(19*2)+(10*1)+(9*1)), 24, 3, 1, (int i, string n) => {

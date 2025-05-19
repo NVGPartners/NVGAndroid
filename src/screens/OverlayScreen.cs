@@ -4,7 +4,10 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+
+#if !ANDROID
 using Steamworks;
+#endif
 
 namespace NonsensicalVideoGenerator
 {
@@ -48,6 +51,7 @@ namespace NonsensicalVideoGenerator
                 spriteBatch.Draw(pixel, new Rectangle(0, 0, 4 * GlobalGraphics.scale, GlobalGraphics.scaledHeight), bgColor);
                 spriteBatch.Draw(pixel, new Rectangle(GlobalGraphics.scaledWidth - 4 * GlobalGraphics.scale, 0, 4 * GlobalGraphics.scale, GlobalGraphics.scaledHeight), bgColor);
             }
+#if !ANDROID
             if(videoFullscreen)
             {
                 if(UserInterface.instance != null && UserInterface.instance.video != null && UserInterface.instance.videoPlayer != null && UserInterface.instance.videoPlayer.State != MediaState.Stopped)
@@ -70,6 +74,7 @@ namespace NonsensicalVideoGenerator
                         spriteBatch.Draw(pixel, new Rectangle(0, GlobalGraphics.scaledHeight - GlobalGraphics.Scale(4), (int)(FramePlayer.currentAudioTime * (GlobalGraphics.scaledWidth - GlobalGraphics.Scale(5)) / FramePlayer.audioLength), GlobalGraphics.Scale(4)), ThemeManager.GetColor("VideoPlayerProgressBar"));
                 }
             }
+#endif
             // Draw a red box in the top right corner
             spriteBatch.Draw(pixel, new Rectangle(GlobalGraphics.scaledWidth - GlobalGraphics.Scale(5), 0, GlobalGraphics.Scale(5), GlobalGraphics.Scale(5)), ThemeManager.GetColor("VideoPlayerProgressBar"));
             // Draw an X in the red box
@@ -161,10 +166,12 @@ namespace NonsensicalVideoGenerator
                     Global.exiting = false;
                     if(!Global.fakeExit)
                     {
+#if !ANDROID
                         try
                         {
                             SteamAPI.Shutdown();
                         } catch {}
+#endif
                         if(UserInterface.instance != null)
                             UserInterface.instance.Exit();
                     }

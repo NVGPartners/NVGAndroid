@@ -3,7 +3,10 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Xna.Framework;
+
+#if !ANDROID
 using Steamworks;
+#endif
 
 namespace NonsensicalVideoGenerator
 {
@@ -13,6 +16,7 @@ namespace NonsensicalVideoGenerator
         // It also checks for the presence of the steam_appid.txt file, which should not be present in release builds.
         public static void Check()
         {
+#if !ANDROID
             string cwd = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? ".");
             ConsoleOutput.WriteLine("Kiwano: Preparing for crash reporting...", Color.Transparent);
             if(SteamManager.initialized)
@@ -37,6 +41,7 @@ namespace NonsensicalVideoGenerator
                 // Release builds should NEVER have this file.
                 ConsoleOutput.WriteLine("Kiwano: Steam app ID: "+File.ReadAllText(Path.Combine(cwd, "steam_appid.txt")), Color.Transparent);
             }
+#endif
         }
     }
 }

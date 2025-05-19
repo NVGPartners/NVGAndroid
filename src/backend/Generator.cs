@@ -7,8 +7,11 @@ using System.Diagnostics;
 using System.Threading;
 using System.Text.RegularExpressions;
 using System.Reflection;
-using MonoGame.Extended.VideoPlayback;
 using Microsoft.Xna.Framework;
+
+#if !ANDROID
+using MonoGame.Extended.VideoPlayback;
+#endif
 
 namespace NonsensicalVideoGenerator
 {
@@ -57,7 +60,9 @@ namespace NonsensicalVideoGenerator
         public BackgroundWorker? timeoutWorker { get; set; }
         public BackgroundWorker? killWorker { get; set; }
         public int timeout = 0;
+#if !ANDROID
         public string tempOutput = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? ".", "library", "video", "renders", "temp.mp4");
+#endif
         public static string oldExportParams = "-c:v libx264 -crf 18 -preset veryfast -ar 32000 -shortest -fflags +genpts";
         public static string betterExportParams = "-vcodec libx264 -crf 28 -preset ultrafast -ac 2 -c:a aac -b:a 160k -ar 44100 -map_metadata -1 -reset_timestamps 1 -shortest -fflags +genpts";
         public bool audioSync = true;
@@ -92,13 +97,14 @@ namespace NonsensicalVideoGenerator
         // Kill worker
         public void KillThread(object? sender, DoWorkEventArgs e)
         {
+#if !ANDROID
             if (killWorker?.CancellationPending == true)
                 return;
             KillChildProcesses();
             failureReason = L.T(0, "Generate:StatusCancelled");
             progressText = failureReason;
             ConsoleOutput.WriteLine("Generation cancelled.", Color.Red);
-            if(forceConcatenate)
+            if (forceConcatenate)
             {
                 // Count videos under Path.Combine(temporaryDirectory, "0.mp4")
                 Regex regex = new Regex(@"(\d+)\.mp4");
@@ -111,9 +117,9 @@ namespace NonsensicalVideoGenerator
                         clips.Add(new Clip(match.Groups[1].Value + ".mp4"));
                     }
                 }
-                if(clips.Count > 0)
+                if (clips.Count > 0)
                 {
-                    for(int i = 0; i < clips.Count; i++)
+                    for (int i = 0; i < clips.Count; i++)
                     {
                         ApplyEffects(clips[i], i, clips.Count);
                     }
@@ -128,7 +134,7 @@ namespace NonsensicalVideoGenerator
                         ConsoleOutput.WriteLine("Saving to library...", Color.LightGreen);
                         LibraryFile libraryFile = new LibraryFile(Global.videoTitle, tempOutput, DefaultLibraryTypes.Render);
                         progressText = L.T(0, "Generate:StatusLibrarySave");
-                        if(LibraryData.Load(libraryFile) == null)
+                        if (LibraryData.Load(libraryFile) == null)
                         {
                             ConsoleOutput.WriteLine("Failed to save to library.", Color.Red);
                             progressText = L.T(0, "Generate:StatusFailLibrarySave");
@@ -141,9 +147,9 @@ namespace NonsensicalVideoGenerator
                             if (bool.Parse(SaveData.saveValues["PlayAutomatically"]))
                             {
                                 FramePlayer.Stop();
-                                if(UserInterface.instance != null)
+                                if (UserInterface.instance != null)
                                 {
-                                    if(UserInterface.instance.videoPlayer != null)
+                                    if (UserInterface.instance.videoPlayer != null)
                                     {
                                         Global.videoPlaying = false;
                                         UserInterface.instance.videoPlayer.Dispose();
@@ -151,7 +157,7 @@ namespace NonsensicalVideoGenerator
                                     }
                                     UserInterface.instance.videoPlayer = new MonoGame.Extended.Framework.Media.VideoPlayer(UserInterface.instance.GraphicsDevice);
                                     FramePlayer.canPlayBgMusic = true;
-                                    if(UserInterface.instance.video != null)
+                                    if (UserInterface.instance.video != null)
                                     {
                                         UserInterface.instance.video.Dispose();
                                         UserInterface.instance.video = null;
@@ -166,7 +172,7 @@ namespace NonsensicalVideoGenerator
                                 }
                                 FramePlayer.canPlayBgMusic = false;
                                 Global.generator.progressText = L.T(0, "Video:StatusPlay");
-                                if(ScreenManager.GetScreen<VideoScreen>("Video") == null
+                                if (ScreenManager.GetScreen<VideoScreen>("Video") == null
                                     || ScreenManager.GetScreen<VideoScreen>("Video")?.screenType == ScreenType.Hidden)
                                 {
                                     ScreenManager.PushNavigation("Video");
@@ -183,7 +189,7 @@ namespace NonsensicalVideoGenerator
                         failureReason = L.T(0, "Generate:StatusFailConcatenation");
                         finished = false;
                     }
-                    if(finished)
+                    if (finished)
                     {
                         progressText = L.T(0, "Generate:StatusCompleted");
                         progressState = ProgressState.Completed;
@@ -195,27 +201,27 @@ namespace NonsensicalVideoGenerator
                             {
                                 "ACHIEVEMENT_FIRST_RENDER",
                             };
-                            if(Global.usedWorkshopPlugin)
+                            if (Global.usedWorkshopPlugin)
                             {
                                 Global.usedWorkshopPlugin = false;
                                 achievements.Add("ACHIEVEMENT_WORKSHOP_USAGE");
                             }
-                            if(Global.rolledForOverlay)
+                            if (Global.rolledForOverlay)
                             {
                                 Global.rolledForOverlay = false;
                                 achievements.Add("ACHIEVEMENT_CHROMA_KEY");
                             }
-                            if(Global.usedAllEffectChance)
+                            if (Global.usedAllEffectChance)
                             {
                                 Global.usedAllEffectChance = false;
                                 achievements.Add("ACHIEVEMENT_ALL_EFFECTS");
                             }
-                            if(Global.usedDifferentOutro)
+                            if (Global.usedDifferentOutro)
                             {
                                 Global.usedDifferentOutro = false;
                                 achievements.Add("ACHIEVEMENT_OUTRO_OVERRIDE");
                             }
-                            foreach(string achievement in achievements)
+                            foreach (string achievement in achievements)
                             {
                                 Achievements.Award(achievement);
                             }
@@ -239,11 +245,13 @@ namespace NonsensicalVideoGenerator
                     }
                 }
             }
+#endif
         }
         // Start kill thread
         public void StartKillThread()
         {
-            if(killWorker?.IsBusy == true)
+#if !ANDROID
+            if (killWorker?.IsBusy == true)
             {
                 ConsoleOutput.WriteLine("Cancellation already in progress.", Color.Red);
                 return;
@@ -254,10 +262,12 @@ namespace NonsensicalVideoGenerator
                 killWorker.DoWork += KillThread;
             }
             killWorker.RunWorkerAsync();
+#endif
         }
         // Timeout handler
         public void TimeoutThread(object? sender, DoWorkEventArgs e)
         {
+#if !ANDROID
             while (bool.Parse(SaveData.saveValues["EnableTimeOut"]))
             {
                 if (timeoutWorker?.CancellationPending == true)
@@ -268,34 +278,36 @@ namespace NonsensicalVideoGenerator
                     ConsoleOutput.WriteLine("Timed out.", Color.Red);
                     KillChildProcesses();
                 }
-                if(timeout > -1)
+                if (timeout > -1)
                     timeout--;
                 Thread.Sleep(1000);
             }
+#endif
         }
         public void ApplyEffects(Clip thisClip, int i, int maxClips)
         {
+#if !ANDROID
             try
             {
-                if(thisClip.intro)
+                if (thisClip.intro)
                     return;
-                if(!thisClip.rolledForTransition || bool.Parse(SaveData.saveValues["TransitionEffects"]))
+                if (!thisClip.rolledForTransition || bool.Parse(SaveData.saveValues["TransitionEffects"]))
                 {
                     int numberOfPlugins = PluginHandler.GetPluginCount(true);
-                    if(numberOfPlugins > 0)
+                    if (numberOfPlugins > 0)
                     {
                         // Roll for effect
                         RollReason rollReason = RollReason.NoRoll;
                         int roll = RandomInt(0, 100);
-                        if(thisClip.rolledForTransition && int.Parse(SaveData.saveValues["TransitionEffectChance"], CultureInfo.InvariantCulture) == 100)
+                        if (thisClip.rolledForTransition && int.Parse(SaveData.saveValues["TransitionEffectChance"], CultureInfo.InvariantCulture) == 100)
                             rollReason = RollReason.TransitionEffectChance100Percent;
-                        else if(!thisClip.rolledForTransition && int.Parse(SaveData.saveValues["EffectChance"], CultureInfo.InvariantCulture) == 100)
+                        else if (!thisClip.rolledForTransition && int.Parse(SaveData.saveValues["EffectChance"], CultureInfo.InvariantCulture) == 100)
                             rollReason = RollReason.EffectChance100Percent;
-                        else if(thisClip.rolledForTransition && roll < int.Parse(SaveData.saveValues["TransitionEffectChance"], CultureInfo.InvariantCulture))
+                        else if (thisClip.rolledForTransition && roll < int.Parse(SaveData.saveValues["TransitionEffectChance"], CultureInfo.InvariantCulture))
                             rollReason = RollReason.TransitionEffect;
-                        else if(!thisClip.rolledForTransition && roll < int.Parse(SaveData.saveValues["EffectChance"], CultureInfo.InvariantCulture))
+                        else if (!thisClip.rolledForTransition && roll < int.Parse(SaveData.saveValues["EffectChance"], CultureInfo.InvariantCulture))
                             rollReason = RollReason.Effect;
-                        switch(rollReason)
+                        switch (rollReason)
                         {
                             case RollReason.TransitionEffectChance100Percent:
                                 ConsoleOutput.WriteLine("Clip " + i + ": Transition effect chance is 100%", Color.Gray);
@@ -313,14 +325,14 @@ namespace NonsensicalVideoGenerator
                                 ConsoleOutput.WriteLine("Clip " + i + ": No effect rolled.", Color.Gray);
                                 break;
                         }
-                        if(rollReason != RollReason.NoRoll)
+                        if (rollReason != RollReason.NoRoll)
                         {
                             progressText = L.T(0, thisClip.rolledForTransition ? "Generate:StatusApplyTransitionEffect" : "Generate:StatusApplyEffect", (i + 1).ToString(CultureInfo.InvariantCulture), maxClips.ToString(CultureInfo.InvariantCulture));
                             // We rolled for an effect, let's pick one.
                             PluginReturnValue effect = PluginHandler.PickRandom(globalRandom, Path.Combine(temporaryDirectory, thisClip.name));
-                            if(effect.success)
+                            if (effect.success)
                             {
-                                if(int.Parse(SaveData.saveValues["EffectChance"], CultureInfo.InvariantCulture) >= 100)
+                                if (int.Parse(SaveData.saveValues["EffectChance"], CultureInfo.InvariantCulture) >= 100)
                                 {
                                     Global.usedAllEffectChance = true;
                                 }
@@ -329,9 +341,9 @@ namespace NonsensicalVideoGenerator
                                 // Search for output.mp4 in job folder.
                                 string[] files = Directory.GetFiles(effect.jobFolder);
                                 bool foundOutput = false;
-                                foreach(string file in files)
+                                foreach (string file in files)
                                 {
-                                    if(Path.GetFileName(file) == "output.mp4")
+                                    if (Path.GetFileName(file) == "output.mp4")
                                     {
                                         // Make sure this is a valid file with ffprobe.
                                         ProcessStartInfo ffprobe = new ProcessStartInfo()
@@ -359,18 +371,18 @@ namespace NonsensicalVideoGenerator
                                         break;
                                     }
                                 }
-                                if(foundOutput)
+                                if (foundOutput)
                                 {
                                     // Delete existing videoi.mp4
-                                    if(File.Exists(Path.Combine(temporaryDirectory, thisClip.name)))
+                                    if (File.Exists(Path.Combine(temporaryDirectory, thisClip.name)))
                                         File.Delete(Path.Combine(temporaryDirectory, thisClip.name));
                                     try
                                     {
                                         File.Move(effect.jobFolder + "output.mp4", Path.Combine(temporaryDirectory, thisClip.name));
                                     }
-                                    catch(Exception ex)
+                                    catch (Exception ex)
                                     {
-                                        ConsoleOutput.WriteLine("Failed to move output.mp4 to " + thisClip.name +": " + ex.Message, Color.Red);
+                                        ConsoleOutput.WriteLine("Failed to move output.mp4 to " + thisClip.name + ": " + ex.Message, Color.Red);
                                         effect.success = false;
                                     }
                                 }
@@ -379,23 +391,25 @@ namespace NonsensicalVideoGenerator
                                     effect.success = false;
                                 }
                                 // Delete job folder.
-                                if(!bool.Parse(SaveData.saveValues["HiddenKeepTemporaryJobFolders"]))
+                                if (!bool.Parse(SaveData.saveValues["HiddenKeepTemporaryJobFolders"]))
                                     Directory.Delete(effect.jobFolder, true);
                             }
-                            ConsoleOutput.WriteLine(effect.success ? "Applied "+effect.pluginName+" to " + (thisClip.rolledForTransition ? "transition" : "clip") + " " + i + "." : "Failed to apply "+effect.pluginName+" to " + (thisClip.rolledForTransition ? "transition" : "clip") + " " + i + ".", effect.success ? Color.LightGreen : Color.Red);
+                            ConsoleOutput.WriteLine(effect.success ? "Applied " + effect.pluginName + " to " + (thisClip.rolledForTransition ? "transition" : "clip") + " " + i + "." : "Failed to apply " + effect.pluginName + " to " + (thisClip.rolledForTransition ? "transition" : "clip") + " " + i + ".", effect.success ? Color.LightGreen : Color.Red);
                         }
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Achievements.Award("ACHIEVEMENT_LUA_ERROR");
                 ConsoleOutput.WriteLine(ex.Message, Color.Red);
                 ConsoleOutput.WriteLine("Failed to apply effect to clip " + i + ".", Color.Red);
             }
+#endif
         }
         public void VidThread(object? sender, DoWorkEventArgs e)
         {
+#if !ANDROID
             if (vidThreadWorker?.CancellationPending == true)
                 return;
             // Reset progress state
@@ -765,7 +779,7 @@ namespace NonsensicalVideoGenerator
                         ConsoleOutput.WriteLine("Saving to library...", Color.LightGreen);
                         LibraryFile libraryFile = new LibraryFile(Global.videoTitle, tempOutput, DefaultLibraryTypes.Render);
                         progressText = L.T(0, "Generate:StatusLibrarySave");
-                        if(LibraryData.Load(libraryFile) == null)
+                        if (LibraryData.Load(libraryFile) == null)
                         {
                             ConsoleOutput.WriteLine("Failed to save to library.", Color.Red);
                             progressText = L.T(0, "Generate:StatusFailLibrarySave");
@@ -779,16 +793,16 @@ namespace NonsensicalVideoGenerator
                             if (bool.Parse(SaveData.saveValues["PlayAutomatically"]))
                             {
                                 FramePlayer.Stop();
-                                if(UserInterface.instance != null)
+                                if (UserInterface.instance != null)
                                 {
-                                    if(UserInterface.instance.videoPlayer != null)
+                                    if (UserInterface.instance.videoPlayer != null)
                                     {
                                         Global.videoPlaying = false;
                                         UserInterface.instance.videoPlayer.Dispose();
                                         UserInterface.instance.videoPlayer = null;
                                     }
                                     UserInterface.instance.videoPlayer = new MonoGame.Extended.Framework.Media.VideoPlayer(UserInterface.instance.GraphicsDevice);
-                                    if(UserInterface.instance.video != null)
+                                    if (UserInterface.instance.video != null)
                                     {
                                         UserInterface.instance.video.Dispose();
                                         UserInterface.instance.video = null;
@@ -803,7 +817,7 @@ namespace NonsensicalVideoGenerator
                                     UserInterface.instance.videoPlayer.Volume = float.Parse(SaveData.saveValues["VideoVolume"], CultureInfo.InvariantCulture) / 100f;
                                 }
                                 FramePlayer.canPlayBgMusic = false;
-                                if(ScreenManager.GetScreen<VideoScreen>("Video") == null
+                                if (ScreenManager.GetScreen<VideoScreen>("Video") == null
                                     || ScreenManager.GetScreen<VideoScreen>("Video")?.screenType == ScreenType.Hidden)
                                 {
                                     ScreenManager.PushNavigation("Video");
@@ -862,6 +876,7 @@ namespace NonsensicalVideoGenerator
                 }
             }
             //CleanUp();
+#endif
         }
         public void StartGeneration()
         {
@@ -870,13 +885,14 @@ namespace NonsensicalVideoGenerator
         }
         public void StartGeneration(ProgressChangedEventHandler progressReporter, RunWorkerCompletedEventHandler completedReporter)
         {
+#if !ANDROID
             // Delete all paths in calledMedia with LibraryData.Unload()
-            if(bool.Parse(SaveData.saveValues["DeleteClipsAfterMaxUniqueClips"])
+            if (bool.Parse(SaveData.saveValues["DeleteClipsAfterMaxUniqueClips"])
                 || bool.Parse(SaveData.saveValues["DisableClipsAfterMaxUniqueClips"]))
             {
                 for (int i = 0; i < LibraryData.calledMedia.Count; i++)
                 {
-                    if(bool.Parse(SaveData.saveValues["DeleteClipsAfterMaxUniqueClips"]))
+                    if (bool.Parse(SaveData.saveValues["DeleteClipsAfterMaxUniqueClips"]))
                         LibraryData.Unload(LibraryData.calledMedia[i]);
                     else
                         LibraryData.SetEnabled(LibraryData.calledMedia[i], false);
@@ -889,7 +905,7 @@ namespace NonsensicalVideoGenerator
             FramePlayer.Stop();
             try
             {
-                if(vidThreadWorker == null)
+                if (vidThreadWorker == null)
                 {
                     vidThreadWorker = new BackgroundWorker();
                     vidThreadWorker.DoWork += VidThread;
@@ -902,12 +918,12 @@ namespace NonsensicalVideoGenerator
                 {
                     vidThreadWorker.CancelAsync();
                 }
-                if(vidThreadWorker.IsBusy)
+                if (vidThreadWorker.IsBusy)
                 {
                     ConsoleOutput.WriteLine("Generation is busy...", Color.Red);
                     return;
                 }
-                if(timeoutWorker == null)
+                if (timeoutWorker == null)
                 {
                     timeoutWorker = new BackgroundWorker();
                     timeoutWorker.DoWork += TimeoutThread;
@@ -922,21 +938,22 @@ namespace NonsensicalVideoGenerator
                 // Print out current save data
                 ConsoleOutput.WriteLine("Save data:", Color.Transparent);
                 ConsoleOutput.WriteLine("{", Color.Transparent);
-                foreach(KeyValuePair<string, string> kvp in SaveData.saveValues)
+                foreach (KeyValuePair<string, string> kvp in SaveData.saveValues)
                 {
                     ConsoleOutput.WriteLine("  \"" + kvp.Key + "\": \"" + kvp.Value + "\"", Color.Transparent);
                 }
                 ConsoleOutput.WriteLine("}", Color.Transparent);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 progressState = ProgressState.Failed;
                 failureReason = L.T(0, "Generate:StatusFailGeneric");
                 progressText = failureReason;
                 ConsoleOutput.WriteLine(ex.Message, Color.Red);
-                if(ex.StackTrace != null)
+                if (ex.StackTrace != null)
                     ConsoleOutput.WriteLine(ex.StackTrace, Color.Transparent);
             }
+#endif
         }
         public void ToggleGeneration(ProgressChangedEventHandler progressReporter, RunWorkerCompletedEventHandler completedReporter)
         {
@@ -944,14 +961,15 @@ namespace NonsensicalVideoGenerator
         }
         public void CancelGeneration(bool user = false, bool forceConcatenate = false)
         {
-            if(vidThreadWorker != null)
+#if !ANDROID
+            if (vidThreadWorker != null)
             {
                 // Make sure it's not completed or cancelled already.
                 progressState = ProgressState.Failed;
-                if(user)
+                if (user)
                 {
                     this.forceConcatenate = forceConcatenate;
-                    if(vidThreadWorker.IsBusy)
+                    if (vidThreadWorker.IsBusy)
                     {
                         failureReason = L.T(0, "Generate:StatusCancelling");
                         progressText = failureReason;
@@ -981,8 +999,9 @@ namespace NonsensicalVideoGenerator
                 vidThreadWorker.CancelAsync();
                 generatorActive = false;
             }
-            if(timeoutWorker != null)
+            if (timeoutWorker != null)
                 timeoutWorker.CancelAsync();
+#endif
         }
         public float RandomFloat(float min, float max)
         {

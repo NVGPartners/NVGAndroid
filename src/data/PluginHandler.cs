@@ -1,3 +1,4 @@
+#if !ANDROID
 using System.Diagnostics;
 using System.Reflection;
 using System.IO;
@@ -7,12 +8,12 @@ using Newtonsoft.Json;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using System.Text.RegularExpressions;
-using MoonSharp.Interpreter;
-using Steamworks;
 using System.ComponentModel;
 using System.Net;
 using System.Globalization;
+using MoonSharp.Interpreter;
 using System.Windows.Forms;
+using Steamworks;
 
 namespace NonsensicalVideoGenerator
 {
@@ -2265,3 +2266,4 @@ namespace NonsensicalVideoGenerator
         }
     }
 }
+#endif

@@ -165,6 +165,7 @@ namespace NonsensicalVideoGenerator
                             GlobalContent.PlaySound("Select");
                             return true;
                         }
+#if !ANDROID
                         if(MouseInput.MouseState.Y >= GlobalGraphics.Scale(33+(8*10)) && MouseInput.MouseState.Y <= GlobalGraphics.Scale(33+(8*10)+6))
                         {
                             // Cycle theme.
@@ -224,6 +225,7 @@ namespace NonsensicalVideoGenerator
                             });
                             return true;
                         }
+#endif
                         if(MouseInput.MouseState.Y >= GlobalGraphics.Scale(33+(8*11)) && MouseInput.MouseState.Y <= GlobalGraphics.Scale(33+(8*11)+6))
                         {
                             // Save.
@@ -330,7 +332,9 @@ namespace NonsensicalVideoGenerator
                 DrawButton(spriteBatch, 128, 33+(8*7), "Draw Offset: " + GlobalGraphics.drawOffset.X.ToString(CultureInfo.InvariantCulture) + ", " + GlobalGraphics.drawOffset.Y.ToString(CultureInfo.InvariantCulture));
                 DrawButton(spriteBatch, 128, 33+(8*8), "Export Params: " + (Generator.exportParams.StartsWith("-vcodec") ? "better" : (Generator.exportParams.StartsWith("-af") ? "better (audio sync)" : "old")));
                 DrawButton(spriteBatch, 128, 33+(8*9), "Music: #" + (UserInterface.instance != null ? UserInterface.instance.music+1 : 0));
+#if !ANDROID
                 DrawButton(spriteBatch, 128, 33+(8*10), "Theme: " + ThemeManager.activeTheme.name);
+#endif
                 DrawButton(spriteBatch, 128, 33+(8*11), "Save");
                 DrawButton(spriteBatch, 128, 33+(8*12), "Holiday: " + (HolidayManager.CurrentHoliday != null ? HolidayManager.CurrentHoliday.Name : "None"));
                 DrawButton(spriteBatch, 128, 33+(8*13), (GlobalGraphics.fullScreen ? "Disable" : "Enable") + " Fullscreen");

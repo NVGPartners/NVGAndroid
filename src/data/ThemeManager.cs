@@ -53,7 +53,7 @@ namespace NonsensicalVideoGenerator
     }
     public static class DefaultThemes
     {
-        public static Theme Nonsensical = new Theme("Nonsensical", "The default theme.", "", 6, 4, new Dictionary<string, Color>() {
+        public static Theme Nonsensical = new Theme("Nonsensical", "The default theme.", "./", 6, 4, new Dictionary<string, Color>() {
             {"ClearColor", new Color(0, 0, 0, 255)},
             {"ShadowActionButtonInteractable", new Color(0, 0, 0, 255)},
             {"ShadowButtonInteractable", new Color(0, 0, 0, 255)},
@@ -96,10 +96,12 @@ namespace NonsensicalVideoGenerator
         public static List<Theme> themes = new List<Theme>()
         {
             Nonsensical,
+#if !ANDROID
             Anniversary,
             Spooky,
             Birthday,
             Holiday
+#endif
         };
         public static Theme defaultTheme = Nonsensical;
     }
@@ -108,7 +110,9 @@ namespace NonsensicalVideoGenerator
         public static List<Theme> themes = new List<Theme>()
         {
             DefaultThemes.Nonsensical,
+#if !ANDROID
             DefaultThemes.Spooky
+#endif
         };
         public static Theme activeTheme = DefaultThemes.Nonsensical;
         public static void LoadThemes()
@@ -120,6 +124,7 @@ namespace NonsensicalVideoGenerator
             }
             bool themeChanged = false;
             Theme newTheme = DefaultThemes.defaultTheme;
+#if !ANDROID
             List<Plugin> themeList = PluginHandler.GetEnabledPluginsOfType(AddonType.Theme);
             foreach (Plugin theme in themeList)
             {
@@ -187,7 +192,8 @@ namespace NonsensicalVideoGenerator
                     PluginHandler.SavePluginSettings();
                 }
             }
-            if(themeChanged)
+#endif
+            if (themeChanged)
             {
                 ApplyTheme(newTheme);
             }
@@ -200,24 +206,27 @@ namespace NonsensicalVideoGenerator
         // Replacement for contentManager.Load<T>(path)
         public static T LoadLayeredContent<T>(string path)
         {
-            if(UserInterface.instance == null)
+            if (UserInterface.instance == null)
             {
                 // Can't proceed, MonoGame isn't initialized
                 throw new InvalidOperationException("MonoGame isn't initialized. Cannot load content.");
             }
             ContentManager contentManager = UserInterface.instance.Content;
-            GraphicsDevice graphicsDevice = UserInterface.instance.GraphicsDevice;
             // If active theme uses mgcb, apply prefix and load
-            if(activeTheme.mgcb)
+#if !ANDROID
+            GraphicsDevice graphicsDevice = UserInterface.instance.GraphicsDevice;
+            if (activeTheme.mgcb)
             {
                 // Make sure xnb file exists
-                if(!File.Exists(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? ".", "Content", activeTheme.prefix + path + ".xnb")))
+                if (!File.Exists(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? ".", "Content", activeTheme.prefix + path + ".xnb")))
                 {
                     //ConsoleOutput.WriteLine($"Fallback: {path} not found in {activeTheme.name}.", Color.Yellow);
                     // If not, load from default theme
                     return contentManager.Load<T>(path);
                 }
+#endif
                 return contentManager.Load<T>(activeTheme.prefix + path);
+#if !ANDROID
             }
             // Otherwise, load assets
             string fullPath = Path.Combine(activeTheme.prefix, path.Replace('/', Path.DirectorySeparatorChar));
@@ -232,14 +241,14 @@ namespace NonsensicalVideoGenerator
                 case "Song":
                     // Check if music is wma or ogg
                     fullPath += ".wma";
-                    if(!File.Exists(fullPath))
+                    if (!File.Exists(fullPath))
                     {
                         fullPath = fullPath.Replace(".wma", ".ogg");
                     }
                     break;
             }
             // Check to see if the file exists
-            if(!File.Exists(fullPath))
+            if (!File.Exists(fullPath))
             {
                 //ConsoleOutput.WriteLine($"Fallback: {path} not found in {activeTheme.name}.", Color.Yellow);
                 // If not, load from default theme
@@ -262,6 +271,7 @@ namespace NonsensicalVideoGenerator
                     //ConsoleOutput.WriteLine($"Failed to load {path}.", Color.Red);
                     return contentManager.Load<T>(path);
             }
+#endif
         }
         public static int GetSongCount()
         {

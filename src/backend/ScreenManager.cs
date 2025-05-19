@@ -1,11 +1,16 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Input.Touch;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+
+#if ANDROID
+using Android.Hardware.Input;
+#endif
 
 namespace NonsensicalVideoGenerator
 {
@@ -192,19 +197,36 @@ namespace NonsensicalVideoGenerator
             keyboardState = Keyboard.GetState();
             // Handle mouse input, so that screens don't have to do that.
             // Only change if the window is active and the mouse is over the window.
-            if(UserInterface.instance != null)
+            if (UserInterface.instance != null)
             {
                 MouseInput.LastMouseState = MouseInput.MouseState;
+#if !ANDROID
                 if((Accessibility.allowAccessibility && !Accessibility.showDisambiguation)
                     || (UserInterface.instance.IsActive && MouseInput.MouseState.X >= 0 && MouseInput.MouseState.X <= GlobalGraphics.scaledWidth
                     && MouseInput.MouseState.Y >= 0 && MouseInput.MouseState.Y <= GlobalGraphics.scaledHeight && !Global.dragDrop))
                 {
                     MouseInput._mouseState = Mouse.GetState();
                 }
+#else
+                TouchCollection touchState = TouchPanel.GetState();
+                if (!MouseInput.isTouching)
+                {
+                    MouseInput.isFirstTouch = !MouseInput.isFirstTouch ? touchState.Count > 0 : false;
+                }
+                else
+                {
+                    MouseInput.isFirstTouch = false;
+                }
+                MouseInput.isTouching = touchState.Count > 0;
+#endif         
             }
+#if !ANDROID
             bool handleInput = Accessibility.showDisambiguation || (UserInterface.instance != null && UserInterface.instance.IsActive && MouseInput.MouseState.X >= 0 && MouseInput.MouseState.X <= GlobalGraphics.scaledWidth &&
                 MouseInput.MouseState.Y >= 0 && MouseInput.MouseState.Y <= GlobalGraphics.scaledHeight && !Global.dragDrop);
-            if(!Debug.paused)
+#else
+            bool handleInput = true;
+#endif
+            if (!Debug.paused)
             {
                 if(Accessibility.PreUpdate(gameTime))
                     handleInput = false;
@@ -224,6 +246,7 @@ namespace NonsensicalVideoGenerator
             }
             if(UserInterface.instance != null)
             {
+#if !ANDROID
                 // Pressing the space bar will skip the intro video.
                 if(UserInterface.instance.videoPlayer != null && !UserInterface.instance.introFinished)
                 {
@@ -239,6 +262,7 @@ namespace NonsensicalVideoGenerator
                         GlobalContent.PlaySound("Hover");
                     }
                 }
+#endif
                 // F11 or Alt+Enter will toggle fullscreen
                 if(keyboardState.IsKeyDown(Keys.F11) && lastKeyboardState.IsKeyUp(Keys.F11)
                     || keyboardState.IsKeyDown(Keys.LeftAlt) && keyboardState.IsKeyDown(Keys.Enter) && lastKeyboardState.IsKeyUp(Keys.Enter))

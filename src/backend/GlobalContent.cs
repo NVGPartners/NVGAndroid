@@ -36,14 +36,6 @@ namespace NonsensicalVideoGenerator
             AddSound("Start", ThemeManager.LoadLayeredContent<SoundEffect>("sound/start"));
             AddSound("CompatSelect", ThemeManager.LoadLayeredContent<SoundEffect>("sound/compatselect"));
             AddSound("Disambiguation", ThemeManager.LoadLayeredContent<SoundEffect>("sound/disambiguation"));
-            // Load default fonts.
-            int scale = int.Parse(SaveData.saveValues["ScreenScale"], CultureInfo.InvariantCulture);
-            AddFont("Munro", ThemeManager.LoadLayeredContent<SpriteFont>("fonts/munro-x"+scale), new Vector2(0, 0));
-            AddFont("MunroSmall", ThemeManager.LoadLayeredContent<SpriteFont>("fonts/munro-small-x"+scale), new Vector2(0, 0));
-            AddFont("NotoSans", ThemeManager.LoadLayeredContent<SpriteFont>("fonts/notosans-x"+scale), new Vector2(-scale/2, -scale*2f));
-            AddFont("NotoSansExtended", ThemeManager.LoadLayeredContent<SpriteFont>("fonts/notosansextended-x"+scale), new Vector2(-scale/2, -scale*2f));
-            AddFont("LanaPixel", ThemeManager.LoadLayeredContent<SpriteFont>("fonts/lanapixel-x"+scale), new Vector2(0, 0));
-            AddFont("LanaPixelExtended", ThemeManager.LoadLayeredContent<SpriteFont>("fonts/lanapixelextended-x"+scale), new Vector2(0, 0));
             // Load default songs.
             for(int i = 1; i < ThemeManager.GetSongCount()+1; i++)
             {
@@ -61,6 +53,14 @@ namespace NonsensicalVideoGenerator
                     songs.Add(song);
                 }
             }
+            // Load default fonts.
+            int scale = int.Parse(SaveData.saveValues["ScreenScale"], CultureInfo.InvariantCulture);
+            AddFont("Munro", ThemeManager.LoadLayeredContent<SpriteFont>("fonts/munro-x"+scale), new Vector2(0, 0));
+            AddFont("MunroSmall", ThemeManager.LoadLayeredContent<SpriteFont>("fonts/munro-small-x"+scale), new Vector2(0, 0));
+            AddFont("NotoSans", ThemeManager.LoadLayeredContent<SpriteFont>("fonts/notosans-x"+scale), new Vector2(-scale/2, -scale*2f));
+            AddFont("NotoSansExtended", ThemeManager.LoadLayeredContent<SpriteFont>("fonts/notosansextended-x"+scale), new Vector2(-scale/2, -scale*2f));
+            AddFont("LanaPixel", ThemeManager.LoadLayeredContent<SpriteFont>("fonts/lanapixel-x"+scale), new Vector2(0, 0));
+            AddFont("LanaPixelExtended", ThemeManager.LoadLayeredContent<SpriteFont>("fonts/lanapixelextended-x"+scale), new Vector2(0, 0));
             // Create pixel shape.
             Texture2D pixel = new Texture2D(graphicsDevice, 1, 1);
             pixel.SetData(new[] { Color.White });
@@ -138,11 +138,13 @@ namespace NonsensicalVideoGenerator
         }
         public static void UnloadContent()
         {
+#if !ANDROID
             foreach(SoundEffect sound in sounds.Values)
             {
                 sound.Dispose();
             }
-            foreach(Texture2D texture in textures.Values)
+#endif
+            foreach (Texture2D texture in textures.Values)
             {
                 texture.Dispose();
             }
@@ -150,10 +152,12 @@ namespace NonsensicalVideoGenerator
             {
                 fontOffsets.Remove(font);
             }
+#if !ANDROID
             foreach(Song song in songs)
             {
                 song.Dispose();
             }
+#endif
             sounds.Clear();
             textures.Clear();
             fonts.Clear();

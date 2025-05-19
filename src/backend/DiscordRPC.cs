@@ -1,5 +1,8 @@
 using System;
+
+#if !ANDROID
 using DiscordRPC;
+#endif
 
 namespace NonsensicalVideoGenerator
 {
@@ -15,7 +18,9 @@ namespace NonsensicalVideoGenerator
     }
     public static class DiscordRPC
     {
+#if !ANDROID
         private static DiscordRpcClient? client;
+#endif
         public static DateTime timestamp;
         private static string curstate = "";
         public static string state = "";
@@ -48,8 +53,10 @@ namespace NonsensicalVideoGenerator
             try
             {
                 timestamp = DateTime.UtcNow;
+#if !ANDROID
                 client = new DiscordRpcClient("1133301113219727460");
                 client.Initialize();
+#endif
             }
             catch(Exception e)
             {
@@ -58,6 +65,7 @@ namespace NonsensicalVideoGenerator
         }
         public static void Update()
         {
+#if !ANDROID
             if(client == null)
                 return;
             try
@@ -78,9 +86,11 @@ namespace NonsensicalVideoGenerator
             {
                 ConsoleOutput.WriteLine("Discord RPC error: " + e.Message, Microsoft.Xna.Framework.Color.Red);
             }
+#endif
         }
         public static void UpdatePresence()
         {
+#if !ANDROID
             if(client == null)
                 return;
             try
@@ -139,9 +149,11 @@ namespace NonsensicalVideoGenerator
             {
                 ConsoleOutput.WriteLine("Discord RPC error: " + e.Message, Microsoft.Xna.Framework.Color.Red);
             }
+#endif
         }
         public static void Shutdown()
         {
+#if !ANDROID
             if(client == null)
                 return;
             try
@@ -152,6 +164,7 @@ namespace NonsensicalVideoGenerator
             {
                 ConsoleOutput.WriteLine("Discord RPC error: " + e.Message, Microsoft.Xna.Framework.Color.Red);
             }
+#endif
         }
     }
 }

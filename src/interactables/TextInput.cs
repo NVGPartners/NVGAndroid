@@ -1,10 +1,13 @@
 using System;
 using System.Globalization;
-using System.Windows;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+
+#if !ANDROID
+using System.Windows;
+#endif
 
 namespace NonsensicalVideoGenerator
 {
@@ -246,7 +249,11 @@ namespace NonsensicalVideoGenerator
             {
                 string token = "Interactable:"+internalName+"Title";
                 // check if the token exists
+#if ANDROID
+                string localized = L.T(0, token, "");
+#else
                 string localized = L.T(0, token, PluginHandler.GetPluginListFilter());
+#endif
                 if (localized != token || L.GetLocale().name == "dummy")
                     localizedTitle = localized;
                 else
@@ -278,11 +285,13 @@ namespace NonsensicalVideoGenerator
         }
         public TextEntry Register()
         {
+#if !ANDROID
             GameWindow? window = UserInterface.instance?.Window;
             if (window != null)
             {
                 window.TextInput += TextInput;
             }
+#endif
             return this;
         }
         private bool ValidateInput(char character)
@@ -322,6 +331,7 @@ namespace NonsensicalVideoGenerator
                     // If syn unicode character, paste from clipboard
                     if (e.Character == '\u0016')
                     {
+#if !ANDROID
                         string clipboard = Clipboard.GetText();
                         if (clipboard.Length + Tooltip.Length <= maxChars)
                         {
@@ -347,16 +357,21 @@ namespace NonsensicalVideoGenerator
                         {
                             GlobalContent.PlaySound("Error");
                         }
+#endif
                     }
                     // \u0003 is copy
                     else if (e.Character == '\u0003')
                     {
+#if !ANDROID
                         Clipboard.SetText(Tooltip);
+#endif
                     }
                     // \u0018 is cut
                     else if (e.Character == '\u0018')
                     {
+#if !ANDROID
                         Clipboard.SetText(Tooltip);
+#endif
                         Tooltip = "";
                     }
                     // \u0001 is select all, assume delete all

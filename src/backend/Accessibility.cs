@@ -2,7 +2,10 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+
+#if !ANDROID
 using System.Speech.Synthesis;
+#endif
 
 namespace NonsensicalVideoGenerator
 {
@@ -38,7 +41,9 @@ namespace NonsensicalVideoGenerator
         private static KeyboardState newKeyboardState;
         private static KeyboardState oldKeyboardState2;
         private static KeyboardState newKeyboardState2;
+#if !ANDROID
         public static SpeechSynthesizer synth = new SpeechSynthesizer();
+#endif
         public static bool PreUpdate(GameTime gameTime)
         {
             if(!allowAccessibility)
@@ -63,12 +68,16 @@ namespace NonsensicalVideoGenerator
                     {
                         ttshelp += L.T(0, str) + "; ";
                     }
+#if !ANDROID
                     if(enableTts)
                         synth.SpeakAsync(ttshelp);
+#endif
                 }
                 else
                 {
+#if !ANDROID
                     synth.SpeakAsyncCancelAll();
+#endif
                     GlobalContent.PlaySound("Back");
                     showDisambiguation = false;
                     result = true;
@@ -78,6 +87,7 @@ namespace NonsensicalVideoGenerator
             if(newKeyboardState2.IsKeyDown(Keys.F2) && !oldKeyboardState2.IsKeyDown(Keys.F2))
             {
                 enableTts = !enableTts;
+#if !ANDROID
                 if(synth.State == SynthesizerState.Speaking)
                     synth.SpeakAsyncCancelAll();
                 // Use text to speech to say "text to speech enabled" or "text to speech disabled"
@@ -91,6 +101,7 @@ namespace NonsensicalVideoGenerator
                 {
                     synth.SpeakAsync(L.T(0, "Accessibility:TextToSpeechDisabled"));
                 }
+#endif
                 result = true;
             }
             // Check if user pressed escape key and disambiguation is already showing.
@@ -136,6 +147,7 @@ namespace NonsensicalVideoGenerator
             {
                 if(enableTts)
                 {
+#if !ANDROID
                     if(synth.State == SynthesizerState.Speaking)
                         synth.SpeakAsyncCancelAll();
                     if(overrideString != "")
@@ -145,18 +157,21 @@ namespace NonsensicalVideoGenerator
                         ttsString = disambiguationOptions[-offset].tts;
                         synth.SpeakAsync(disambiguationOptions[-offset].tts);
                     }
+#endif
                 }
                 else
                 {
                     ttsString = disambiguationOptions[-offset].tts;
                 }
             }
+#if !ANDROID
             else if(enableTts && overrideString != "")
             {
                 if(synth.State == SynthesizerState.Speaking)
                     synth.SpeakAsyncCancelAll();
                 synth.SpeakAsync(overrideString);
             }
+#endif
             help[help.Length - 1] = ttsString;
         }
         public static string[] help = new string[]

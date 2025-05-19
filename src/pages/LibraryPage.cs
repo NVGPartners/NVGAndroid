@@ -9,9 +9,12 @@ using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
-using System.Windows;
 using System.Globalization;
+
+#if !ANDROID
+using System.Windows;
 using MonoGame.Extended.VideoPlayback;
+#endif
 
 namespace NonsensicalVideoGenerator
 {
@@ -49,6 +52,7 @@ namespace NonsensicalVideoGenerator
         private readonly InteractableController actionController = new();
         public void CacheLibrary()
         {
+#if !ANDROID
             libraryFileCache.Clear();
             // Get library types
             libraryTypes[LibraryRootType.Video] = LibraryData.GetLibraryNames(LibraryRootType.Video);
@@ -64,9 +68,11 @@ namespace NonsensicalVideoGenerator
                     libraryFileCache[libraryType] = LibraryData.GetFiles(libraryType, false);
                 }
             }
+#endif
         }
         public void LoadContent(ContentManager contentManager, GraphicsDevice graphicsDevice)
         {
+#if !ANDROID
             controller.Clear();
             actionController.Clear();
             actionController.Add("ActionEnableAll", new ActionButton("Enable all content in this category.", new Vector2(112, 206), (int i, string n) => {
@@ -156,9 +162,11 @@ namespace NonsensicalVideoGenerator
             // Interactable
             controller.LoadContent(contentManager, graphicsDevice);
             demandChange = true;
+#endif
         }
         public static void Done(bool success)
         {
+#if !ANDROID
             downloading = false;
             if(success)
             {
@@ -170,9 +178,11 @@ namespace NonsensicalVideoGenerator
                 GlobalContent.PlaySound("Error");
                 Global.generator.progressText = L.T(0, "Library:StatusFailDownloadClip");
             }
+#endif
         }
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
+#if !ANDROID
             // changes
             if(changed)
             {
@@ -408,11 +418,13 @@ namespace NonsensicalVideoGenerator
             {
                 Global.tooltip = tooltip;
             }
+#endif
         }
         // Thread for loading videos
         private BackgroundWorker? loadVideosThread;
         private void LoadVideosThread(object? sender, DoWorkEventArgs e)
         {
+#if !ANDROID
             if(e.Argument == null)
             {
                 // huh?
@@ -519,10 +531,12 @@ namespace NonsensicalVideoGenerator
                     loadVideosThread.Dispose();
             }
             catch {}
-            loadVideosThread = null;
+            loadVideosThread = null
+#endif
         }
         public void ChangeVideos(GraphicsDevice graphicsDevice)
         {
+#if !ANDROID
             try
             {
                 // Cancel previous thread
@@ -547,9 +561,11 @@ namespace NonsensicalVideoGenerator
             {
                 ConsoleOutput.WriteLine("Error changing videos: " + e.Message, Color.Red);
             }
+#endif
         }
         private void TextInput(object? sender, TextInputEventArgs e)
         {
+#if !ANDROID
             if((selectedFlags & 4) == 4)
             {
                 // If syn unicode character, paste from clipboard
@@ -578,9 +594,11 @@ namespace NonsensicalVideoGenerator
                     }
                 }
             }
+#endif
         }
         public bool Update(GameTime gameTime, bool handleInput)
         {
+#if !ANDROID
             if(actionController.Update(gameTime, handleInput))
                 return true;
             if(!registered)
@@ -1049,6 +1067,7 @@ namespace NonsensicalVideoGenerator
                                 {
                                     if (libraryFileCache[currentLibraryType].Count > position)
                                     {
+#if !ANDROID
                                         // Open video with shell using default program
                                         LibraryFile file = libraryFileCache[currentLibraryType][position];
                                         if(file.Path != null)
@@ -1123,6 +1142,7 @@ namespace NonsensicalVideoGenerator
                                                 Process.Start(startInfo);
                                             }
                                             GlobalContent.PlaySound("Select");
+#endif
                                         }
                                         else
                                         {
@@ -1478,6 +1498,7 @@ namespace NonsensicalVideoGenerator
                 return true;
             if(controller.Update(gameTime, handleInput))
                 return true;
+#endif
             return false;
         }
     }

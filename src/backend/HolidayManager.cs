@@ -128,6 +128,7 @@ namespace NonsensicalVideoGenerator
         public static Holiday? CurrentHoliday { get; set; } = null;
         public static List<Holiday> Holidays { get; set; } = new List<Holiday>()
         {
+#if !ANDROID
             new Holiday("newyearseve", "New Year's Eve")
             {
                 Enabled = true,
@@ -184,6 +185,7 @@ namespace NonsensicalVideoGenerator
                 End = new SimpleDateTime(1, 1, 23, 59, 59),
                 StatusText = "Holidays:StatusNewYears"
             }
+#endif
         };
         public static void SetHoliday(Holiday? holiday = null)
         {
@@ -197,16 +199,17 @@ namespace NonsensicalVideoGenerator
         }
         public static void CheckHolidays()
         {
+#if !ANDROID
             // Check for holiday command line parameter.
-            if(Global.parameters.Contains("-holiday"))
+            if (Global.parameters.Contains("-holiday"))
             {
                 int index = Global.parameters.IndexOf("-holiday");
-                if(index + 1 < Global.parameters.Count)
+                if (index + 1 < Global.parameters.Count)
                 {
                     string holiday = Global.parameters[index + 1];
-                    foreach(Holiday h in Holidays)
+                    foreach (Holiday h in Holidays)
                     {
-                        if(h.InternalName == holiday.ToLower())
+                        if (h.InternalName == holiday.ToLower())
                         {
                             SetHoliday(h);
                             return;
@@ -216,19 +219,20 @@ namespace NonsensicalVideoGenerator
             }
             // Respect priority.
             Holiday? newHoliday = new();
-            foreach(Holiday holiday in Holidays)
+            foreach (Holiday holiday in Holidays)
             {
-                if(holiday.CheckDate())
+                if (holiday.CheckDate())
                 {
-                    if(newHoliday.Priority < holiday.Priority)
+                    if (newHoliday.Priority < holiday.Priority)
                     {
                         newHoliday = holiday;
                     }
                 }
             }
-            if(newHoliday.Name == "")
+            if (newHoliday.Name == "")
                 newHoliday = null;
             SetHoliday(newHoliday);
+#endif
         }
     }
 }

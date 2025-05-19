@@ -1,5 +1,8 @@
 using System;
+
+#if !ANDROID
 using Steamworks;
+#endif
 
 namespace NonsensicalVideoGenerator
 {
@@ -31,6 +34,7 @@ namespace NonsensicalVideoGenerator
         }
         public static void Update()
         {
+#if !ANDROID
             if(!SteamManager.initialized)
                 return;
             try
@@ -45,14 +49,17 @@ namespace NonsensicalVideoGenerator
             {
                 ConsoleOutput.WriteLine("Steam rich presence error: " + e.Message, Microsoft.Xna.Framework.Color.Red);
             }
+#endif
         }
         public static void UpdatePresence()
         {
+#if !ANDROID
             if(!SteamManager.initialized)
                 return;
             SteamFriends.SetRichPresence("render", Global.videoTitle + ".mp4");
             SteamFriends.SetRichPresence("tab", curtab.ToString());
             SteamFriends.SetRichPresence("steam_display", "#Status");
+#endif
         }
     }
 }

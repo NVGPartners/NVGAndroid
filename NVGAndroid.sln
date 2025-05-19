@@ -1,0 +1,26 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NVGAndroid", "NVGAndroid.csproj", "{073E56C3-520F-BAFD-1B56-DE6FEF6BB201}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{073E56C3-520F-BAFD-1B56-DE6FEF6BB201}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{073E56C3-520F-BAFD-1B56-DE6FEF6BB201}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{073E56C3-520F-BAFD-1B56-DE6FEF6BB201}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{073E56C3-520F-BAFD-1B56-DE6FEF6BB201}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{073E56C3-520F-BAFD-1B56-DE6FEF6BB201}.Release|Any CPU.Build.0 = Release|Any CPU
+		{073E56C3-520F-BAFD-1B56-DE6FEF6BB201}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {19FE7C41-EC3F-41B9-B7D0-9F8F95C91784}
+	EndGlobalSection
+EndGlobal

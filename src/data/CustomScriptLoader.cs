@@ -1,3 +1,4 @@
+#if !ANDROID
 using System.IO;
 using MoonSharp.Interpreter;
 using MoonSharp.Interpreter.Loaders;
@@ -26,3 +27,4 @@ namespace NonsensicalVideoGenerator
         }
     }
 }
+#endif

@@ -6,7 +6,10 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System.Globalization;
+
+#if !ANDROID
 using MonoGame.Extended.VideoPlayback;
+#endif
 
 namespace NonsensicalVideoGenerator
 {
@@ -242,6 +245,7 @@ namespace NonsensicalVideoGenerator
                 }
                 return false;
             }, ThemeManager.LoadLayeredContent<Texture2D>("graphics/actions/reset")));
+#if !ANDROID
             actionController.Add("ActionPlayLast", new ActionButton("Play last rendered video.", new Vector2(112, 191), (int i, string n) => {
                 switch(i)
                 {
@@ -305,6 +309,7 @@ namespace NonsensicalVideoGenerator
                 }
                 return false;
             }, ThemeManager.LoadLayeredContent<Texture2D>("graphics/actions/playlast")));
+#endif
             actionController.Add("ActionRender", new ActionButton("Start generating a new video.", new Vector2(112, 176), GenerateButton, ThemeManager.LoadLayeredContent<Texture2D>("graphics/actions/render")));
             // RENDERING MODE
             controllerRendering.Add("Cancel", new Button("Cancel", "Stop rendering.", new Vector2(119+36, 60+10+(19*8)), (int i, string n) => {
